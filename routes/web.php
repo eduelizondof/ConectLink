@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ProfilePageController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -15,3 +16,37 @@ Route::get('dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 require __DIR__.'/settings.php';
+
+/*
+|--------------------------------------------------------------------------
+| Public Profile Routes
+|--------------------------------------------------------------------------
+|
+| These routes handle the public-facing profile pages (like Linktree).
+| They should be defined last to avoid conflicts with other routes.
+|
+*/
+
+// Track link clicks
+Route::post('/api/links/{link}/click', [ProfilePageController::class, 'trackClick'])
+    ->name('links.track');
+
+// Download vCard - Organization primary profile
+Route::get('/{orgSlug}/vcard', [ProfilePageController::class, 'downloadVcard'])
+    ->name('profile.vcard')
+    ->where('orgSlug', '[a-z0-9\-]+');
+
+// Download vCard - Employee profile
+Route::get('/{orgSlug}/{profileSlug}/vcard', [ProfilePageController::class, 'downloadVcard'])
+    ->name('profile.employee.vcard')
+    ->where(['orgSlug' => '[a-z0-9\-]+', 'profileSlug' => '[a-z0-9\-]+']);
+
+// Organization primary profile page
+Route::get('/{orgSlug}', [ProfilePageController::class, 'showOrganization'])
+    ->name('profile.show')
+    ->where('orgSlug', '[a-z0-9\-]+');
+
+// Employee profile page
+Route::get('/{orgSlug}/{profileSlug}', [ProfilePageController::class, 'showEmployee'])
+    ->name('profile.employee.show')
+    ->where(['orgSlug' => '[a-z0-9\-]+', 'profileSlug' => '[a-z0-9\-]+']);
