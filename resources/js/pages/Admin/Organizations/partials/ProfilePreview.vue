@@ -1,0 +1,217 @@
+<script setup lang="ts">
+import { computed } from 'vue';
+import {
+    Facebook,
+    Instagram,
+    Twitter,
+    Linkedin,
+    Youtube,
+    Github,
+    Globe,
+    Mail,
+    Phone,
+    Link2,
+    MessageCircle,
+    Send,
+    ChevronRight,
+    Download,
+    Eye,
+} from 'lucide-vue-next';
+
+interface Profile {
+    id: number;
+    name: string;
+    photo?: string;
+    job_title?: string;
+    slogan?: string;
+    bio?: string;
+    settings?: {
+        background_type: string;
+        background_color: string;
+        background_gradient_start?: string;
+        background_gradient_end?: string;
+        background_gradient_direction: string;
+        primary_color: string;
+        text_color: string;
+        text_secondary_color: string;
+        card_style: string;
+        card_background_color: string;
+        card_border_radius: string;
+        photo_style: string;
+    };
+    social_links?: any[];
+    custom_links?: any[];
+}
+
+interface Organization {
+    name: string;
+    logo?: string;
+}
+
+const props = defineProps<{
+    profile: Profile;
+    organization: Organization;
+}>();
+
+const settings = computed(() => props.profile.settings || {
+    background_type: 'solid',
+    background_color: '#ffffff',
+    primary_color: '#3b82f6',
+    text_color: '#1f2937',
+    text_secondary_color: '#6b7280',
+    card_style: 'solid',
+    card_background_color: '#ffffff',
+    card_border_radius: 'lg',
+    photo_style: 'circle',
+});
+
+const backgroundStyle = computed(() => {
+    const s = settings.value;
+    if (s.background_type === 'gradient') {
+        const dir = s.background_gradient_direction === 'to-b' ? '180deg' :
+                    s.background_gradient_direction === 'to-r' ? '90deg' :
+                    s.background_gradient_direction === 'to-br' ? '135deg' : '180deg';
+        return { background: `linear-gradient(${dir}, ${s.background_gradient_start}, ${s.background_gradient_end})` };
+    }
+    return { backgroundColor: s.background_color };
+});
+
+const photoClass = computed(() => {
+    const style = settings.value.photo_style;
+    return style === 'circle' ? 'rounded-full' : style === 'rounded' ? 'rounded-2xl' : 'rounded-none';
+});
+
+const cardClass = computed(() => {
+    const radius = settings.value.card_border_radius;
+    return radius === 'none' ? 'rounded-none' :
+           radius === 'sm' ? 'rounded-sm' :
+           radius === 'md' ? 'rounded-md' :
+           radius === 'lg' ? 'rounded-lg' :
+           radius === 'xl' ? 'rounded-xl' :
+           radius === '2xl' ? 'rounded-2xl' : 'rounded-3xl';
+});
+
+function getSocialIcon(platform: string) {
+    const icons: Record<string, any> = {
+        facebook: Facebook,
+        instagram: Instagram,
+        twitter: Twitter,
+        linkedin: Linkedin,
+        youtube: Youtube,
+        github: Github,
+        whatsapp: MessageCircle,
+        telegram: Send,
+        website: Globe,
+        email: Mail,
+        phone: Phone,
+    };
+    return icons[platform] || Link2;
+}
+</script>
+
+<template>
+    <div class="relative rounded-2xl border shadow-lg overflow-hidden" style="max-height: 600px;">
+        <!-- Phone Frame -->
+        <div class="absolute inset-x-0 top-0 h-6 bg-black rounded-t-2xl flex items-center justify-center z-10">
+            <div class="w-20 h-4 bg-black rounded-full" />
+        </div>
+
+        <!-- Content -->
+        <div
+            class="pt-6 overflow-y-auto"
+            :style="[backgroundStyle, { minHeight: '500px', maxHeight: '600px' }]"
+        >
+            <div class="px-4 py-6 text-center">
+                <!-- Profile Photo -->
+                <div class="flex justify-center mb-4">
+                    <div
+                        class="w-24 h-24 border-4 overflow-hidden"
+                        :class="photoClass"
+                        :style="{ borderColor: settings.primary_color }"
+                    >
+                        <img
+                            v-if="profile.photo"
+                            :src="`/storage/${profile.photo}`"
+                            :alt="profile.name"
+                            class="w-full h-full object-cover"
+                        />
+                        <img
+                            v-else-if="organization.logo"
+                            :src="`/storage/${organization.logo}`"
+                            :alt="organization.name"
+                            class="w-full h-full object-cover"
+                        />
+                        <div v-else class="w-full h-full bg-gray-200 flex items-center justify-center">
+                            <span class="text-3xl font-bold text-gray-400">
+                                {{ profile.name.charAt(0) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Name & Title -->
+                <h2 class="text-lg font-bold" :style="{ color: settings.text_color }">
+                    {{ profile.name }}
+                </h2>
+                <p v-if="profile.job_title" class="text-sm mt-1" :style="{ color: settings.text_secondary_color }">
+                    {{ profile.job_title }}
+                </p>
+
+                <!-- Slogan -->
+                <p v-if="profile.slogan" class="text-base mt-3 font-medium" :style="{ color: settings.text_color }">
+                    {{ profile.slogan }}
+                </p>
+
+                <!-- Bio -->
+                <p v-if="profile.bio" class="text-sm mt-3 leading-relaxed" :style="{ color: settings.text_secondary_color }">
+                    {{ profile.bio.length > 150 ? profile.bio.substring(0, 150) + '...' : profile.bio }}
+                </p>
+
+                <!-- Social Links -->
+                <div v-if="profile.social_links?.length" class="flex flex-wrap justify-center gap-2 mt-6">
+                    <div
+                        v-for="link in profile.social_links.slice(0, 6)"
+                        :key="link.id"
+                        class="w-10 h-10 rounded-full flex items-center justify-center"
+                        :style="{ backgroundColor: settings.primary_color }"
+                    >
+                        <component :is="getSocialIcon(link.platform)" class="w-5 h-5 text-white" />
+                    </div>
+                </div>
+
+                <!-- Custom Links -->
+                <div v-if="profile.custom_links?.length" class="mt-6 space-y-2 px-2">
+                    <div
+                        v-for="link in profile.custom_links.slice(0, 3)"
+                        :key="link.id"
+                        class="p-3 shadow-sm flex items-center justify-between"
+                        :class="cardClass"
+                        :style="{ backgroundColor: link.button_color || settings.card_background_color }"
+                    >
+                        <span class="text-sm font-medium truncate" :style="{ color: link.text_color || settings.text_color }">
+                            {{ link.title }}
+                        </span>
+                        <ChevronRight class="w-4 h-4 opacity-50" :style="{ color: link.text_color || settings.text_color }" />
+                    </div>
+                </div>
+
+                <!-- Download Contact Button -->
+                <button
+                    class="mt-6 inline-flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-medium text-white"
+                    :style="{ backgroundColor: settings.primary_color }"
+                >
+                    <Download class="w-4 h-4" />
+                    Guardar Contacto
+                </button>
+
+                <!-- Views -->
+                <div class="mt-4 flex items-center justify-center gap-1 text-xs opacity-50" :style="{ color: settings.text_secondary_color }">
+                    <Eye class="w-3 h-3" />
+                    <span>Vista previa</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+

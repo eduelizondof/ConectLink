@@ -11,30 +11,46 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-vue-next';
+import {
+    LayoutGrid,
+    Building2,
+    CreditCard,
+    Settings,
+    HelpCircle,
+    ExternalLink,
+} from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
-        href: dashboard(),
+        href: '/admin',
         icon: LayoutGrid,
+    },
+    {
+        title: 'Mis Organizaciones',
+        href: '/admin/organizations',
+        icon: Building2,
+    },
+    {
+        title: 'Planes y Pagos',
+        href: '/admin/plans',
+        icon: CreditCard,
     },
 ];
 
 const footerNavItems: NavItem[] = [
     {
-        title: 'Github Repo',
-        href: 'https://github.com/laravel/vue-starter-kit',
-        icon: Folder,
+        title: 'Ver mi perfil',
+        href: '/',
+        icon: ExternalLink,
     },
     {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
+        title: 'Ayuda',
+        href: '#',
+        icon: HelpCircle,
     },
 ];
 </script>
@@ -45,7 +61,7 @@ const footerNavItems: NavItem[] = [
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
-                        <Link :href="dashboard()">
+                        <Link href="/admin">
                             <AppLogo />
                         </Link>
                     </SidebarMenuButton>

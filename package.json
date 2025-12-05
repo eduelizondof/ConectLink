@@ -31,6 +31,7 @@
     },
     "dependencies": {
         "@inertiajs/vue3": "^2.1.0",
+        "@radix-ui/react-tabs": "^1.1.13",
         "@tsparticles/slim": "^3.9.1",
         "@tsparticles/vue3": "^3.0.1",
         "@types/three": "^0.181.0",
@@ -40,6 +41,7 @@
         "laravel-vite-plugin": "^2.0.0",
         "lucide-vue-next": "^0.468.0",
         "reka-ui": "^2.4.1",
+        "sweetalert2": "^11.26.3",
         "tailwind-merge": "^3.2.0",
         "tailwindcss": "^4.1.1",
         "three": "^0.181.2",

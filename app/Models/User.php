@@ -66,4 +66,62 @@ class User extends Authenticatable
     {
         return $this->hasMany(Profile::class);
     }
+
+    /**
+     * Get the user's limits.
+     */
+    public function limits(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(UserLimit::class);
+    }
+
+    /**
+     * Get the user's subscriptions.
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    /**
+     * Get the user's active subscription.
+     */
+    public function activeSubscription(): ?\Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Subscription::class)->active()->latest();
+    }
+
+    /**
+     * Check if user has an active subscription.
+     */
+    public function hasActiveSubscription(): bool
+    {
+        return $this->subscriptions()->active()->exists();
+    }
+
+    /**
+     * Get user limits (from subscription or defaults).
+     */
+    public function getLimits(): UserLimit
+    {
+        return $this->limits ?? new UserLimit(UserLimit::getDefaults());
+    }
+
+    /**
+     * Check if user can create more organizations.
+     */
+    public function canCreateOrganization(): bool
+    {
+        $limits = $this->getLimits();
+        return $this->organizations()->count() < $limits->max_organizations;
+    }
+
+    /**
+     * Check if user can create more profiles in an organization.
+     */
+    public function canCreateProfileIn(Organization $organization): bool
+    {
+        $limits = $this->getLimits();
+        return $organization->profiles()->count() < $limits->max_profiles_per_org;
+    }
 }
