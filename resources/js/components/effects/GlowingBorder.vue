@@ -33,7 +33,7 @@ const props = withDefaults(defineProps<Props>(), {
     colorSecondary: '',
     borderRadius: '1rem',
     borderWidth: 2,
-    duration: 3,
+    duration: 6,
     blur: 8,
     opacity: 1,
     disabled: false,

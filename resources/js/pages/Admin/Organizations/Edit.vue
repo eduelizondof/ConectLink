@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Head, useForm, usePage, router } from '@inertiajs/vue3';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { useSwal } from '@/composables/useSwal';
 import { ref, computed, onMounted, watch } from 'vue';
 import {
@@ -89,11 +89,39 @@ const orgForm = useForm({
 });
 
 function saveOrganization() {
-    orgForm.put(`/admin/organizations/${props.organization.id}`, {
-        forceFormData: true,
-        preserveScroll: true,
-        onSuccess: () => swal.success('¡Cambios guardados!'),
-    });
+    // If logo is a File, we need to use FormData
+    // Otherwise, send as JSON (normal Inertia request)
+    if (orgForm.logo instanceof File) {
+        orgForm.put(`/admin/organizations/${props.organization.id}`, {
+            forceFormData: true,
+            preserveScroll: true,
+            onSuccess: () => {
+                swal.success('¡Cambios guardados!');
+                orgForm.logo = null;
+            },
+            onError: (errors) => {
+                console.error('Error al guardar:', errors);
+                swal.error('Error al guardar los cambios. Por favor, verifica los datos.');
+            },
+        });
+    } else {
+        // When no file, exclude logo from submission and send as JSON
+        orgForm.transform((data) => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { logo, ...rest } = data;
+            return rest;
+        }).put(`/admin/organizations/${props.organization.id}`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                swal.success('¡Cambios guardados!');
+                orgForm.logo = null;
+            },
+            onError: (errors) => {
+                console.error('Error al guardar:', errors);
+                swal.error('Error al guardar los cambios. Por favor, verifica los datos.');
+            },
+        });
+    }
 }
 
 // Show flash messages

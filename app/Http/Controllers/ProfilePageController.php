@@ -159,7 +159,7 @@ class ProfilePageController extends Controller
             'bio' => $profile->bio,
             'is_primary' => $profile->is_primary,
             'views_count' => $profile->views_count,
-            'settings' => $profile->settings,
+            'settings' => $profile->settings?->toArray(),
             'social_links' => $profile->activeSocialLinks->map(fn($link) => [
                 'id' => $link->id,
                 'platform' => $link->platform,

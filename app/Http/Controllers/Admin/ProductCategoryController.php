@@ -46,12 +46,17 @@ class ProductCategoryController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:100'],
-            'slug' => ['required', 'string', 'max:60', 'alpha_dash', Rule::unique('product_categories')->where('organization_id', $category->organization_id)->ignore($category->id)],
+            'slug' => ['nullable', 'string', 'max:60', 'alpha_dash', Rule::unique('product_categories')->where('organization_id', $category->organization_id)->ignore($category->id)],
             'description' => ['nullable', 'string', 'max:300'],
             'icon' => ['nullable', 'string', 'max:50'],
             'image' => ['nullable', 'image', 'max:1024'],
             'is_active' => ['boolean'],
         ]);
+
+        // Generate slug from name if not provided
+        if (empty($validated['slug'])) {
+            $validated['slug'] = Str::slug($validated['name']);
+        }
 
         if ($request->hasFile('image')) {
             if ($category->image) {

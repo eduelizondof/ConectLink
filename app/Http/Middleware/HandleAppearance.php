@@ -18,6 +18,13 @@ class HandleAppearance
     {
         View::share('appearance', $request->cookie('appearance') ?? 'system');
 
-        return $next($request);
+        $response = $next($request);
+
+        // Ensure we always return a valid response
+        if (!$response instanceof Response) {
+            return response('', 500);
+        }
+
+        return $response;
     }
 }

@@ -20,7 +20,7 @@ const props = withDefaults(defineProps<Props>(), {
     spread: 20,
     borderWidth: 2,
     borderRadius: '12px',
-    duration: 3,
+    duration: 6,
     disabled: false,
     variant: 'default',
 });

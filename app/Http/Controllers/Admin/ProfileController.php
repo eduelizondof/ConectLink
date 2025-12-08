@@ -85,11 +85,9 @@ class ProfileController extends Controller
         try {
             $this->authorize('update', $profile->organization);
 
-            \Log::info('Updating settings for profile: ' . $profile->id, $request->all());
-
             $validated = $request->validate([
                 // Background
-                'background_type' => ['nullable', 'in:solid,gradient,image'],
+                'background_type' => ['required', 'in:solid,gradient,image'],
                 'background_color' => ['nullable', 'string', 'max:7'],
                 'background_gradient_start' => ['nullable', 'string', 'max:7'],
                 'background_gradient_end' => ['nullable', 'string', 'max:7'],
@@ -109,9 +107,9 @@ class ProfileController extends Controller
                 'card_style' => ['nullable', 'in:solid,transparent,glass'],
                 'card_background_color' => ['nullable', 'string', 'max:50'],
                 'card_border_radius' => ['nullable', 'in:none,sm,md,lg,xl,2xl,full'],
-                'card_shadow' => ['boolean'],
+                'card_shadow' => ['nullable'],
                 'card_border_color' => ['nullable', 'string', 'max:50'],
-                'card_glow_enabled' => ['boolean'],
+                'card_glow_enabled' => ['nullable'],
                 'card_glow_color' => ['nullable', 'string', 'max:7'],
                 'card_glow_color_secondary' => ['nullable', 'string', 'max:7'],
                 'card_glow_variant' => ['nullable', 'in:default,cyan,purple,rainbow,primary'],
@@ -126,26 +124,29 @@ class ProfileController extends Controller
                 'animation_delay' => ['nullable', 'integer', 'min:0', 'max:500'],
 
                 // Visual Effects
-                'show_particles' => ['boolean'],
+                'show_particles' => ['nullable'],
                 'particles_style' => ['nullable', 'in:dots,lines,confetti,snow'],
                 'particles_color' => ['nullable', 'string', 'max:7'],
 
                 // Layout
                 'layout_style' => ['nullable', 'in:centered,left,compact'],
-                'show_profile_photo' => ['boolean'],
+                'show_profile_photo' => ['nullable'],
                 'photo_style' => ['nullable', 'in:circle,rounded,square'],
                 'photo_size' => ['nullable', 'in:sm,md,lg,xl'],
 
                 // Social
                 'social_style' => ['nullable', 'in:icons,buttons,pills'],
                 'social_size' => ['nullable', 'in:sm,md,lg'],
-                'social_colored' => ['boolean'],
+                'social_colored' => ['nullable'],
             ]);
 
-            // Set default background_type if not provided
-            $validated['background_type'] = $validated['background_type'] ?? 'solid';
-            
-            \Log::info('Validated data:', $validated);
+            // Convert string booleans to actual booleans (FormData sends as strings)
+            $booleanFields = ['card_shadow', 'card_glow_enabled', 'show_particles', 'show_profile_photo', 'social_colored'];
+            foreach ($booleanFields as $field) {
+                if (isset($validated[$field])) {
+                    $validated[$field] = filter_var($validated[$field], FILTER_VALIDATE_BOOLEAN);
+                }
+            }
 
             if ($request->hasFile('background_image')) {
                 $settings = $profile->settings;
@@ -155,24 +156,27 @@ class ProfileController extends Controller
                 $validated['background_image'] = $request->file('background_image')->store('backgrounds', 'public');
             }
 
-            // Filter out null values to prevent overwriting with nulls
-            $filteredData = array_filter($validated, fn($value) => $value !== null && $value !== '');
+            // Build update data, only including non-null values but keeping false booleans
+            $updateData = [];
+            foreach ($validated as $key => $value) {
+                // Skip null values and empty strings, but keep false booleans and '0' values
+                if ($value !== null && $value !== '') {
+                    $updateData[$key] = $value;
+                } elseif (in_array($key, $booleanFields) && $value === false) {
+                    $updateData[$key] = false;
+                }
+            }
             
             $profile->settings()->updateOrCreate(
                 ['profile_id' => $profile->id],
-                $filteredData
+                $updateData
             );
-
-            \Log::info('Settings saved successfully for profile: ' . $profile->id);
 
             return back()->with('success', '¡Configuración guardada!');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error('Validation error in updateSettings: ', $e->errors());
             throw $e;
         } catch (\Exception $e) {
-            \Log::error('Error in updateSettings: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString()
-            ]);
+            \Log::error('Error in updateSettings: ' . $e->getMessage());
             return back()->with('error', 'Error al guardar: ' . $e->getMessage());
         }
     }

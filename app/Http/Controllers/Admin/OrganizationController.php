@@ -7,6 +7,8 @@ use App\Models\Organization;
 use App\Models\Profile;
 use App\Models\ProfileSetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -34,7 +36,7 @@ class OrganizationController extends Controller
         ]);
     }
 
-    public function create(Request $request): Response
+    public function create(Request $request)
     {
         if (!$request->user()->canCreateOrganization()) {
             return redirect()->route('admin.organizations.index')
@@ -122,27 +124,47 @@ class OrganizationController extends Controller
     {
         $this->authorize('update', $organization);
 
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'slug' => ['required', 'string', 'max:60', 'alpha_dash', Rule::unique('organizations')->ignore($organization->id)],
-            'type' => ['required', 'in:business,personal'],
-            'description' => ['nullable', 'string', 'max:500'],
-            'logo' => ['nullable', 'image', 'max:2048'],
-            'is_active' => ['boolean'],
-        ]);
+        try {
+            $validated = $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'slug' => ['required', 'string', 'max:60', 'alpha_dash', Rule::unique('organizations')->ignore($organization->id)],
+                'type' => ['required', 'in:business,personal'],
+                'description' => ['nullable', 'string', 'max:500'],
+                'logo' => ['nullable', 'image', 'max:2048'],
+                'is_active' => ['boolean'],
+            ]);
 
-        // Handle logo upload
-        if ($request->hasFile('logo')) {
-            // Delete old logo if exists
-            if ($organization->logo) {
-                \Storage::disk('public')->delete($organization->logo);
+            // Handle logo upload
+            // Only process logo if it's actually a file upload
+            if ($request->hasFile('logo')) {
+                // Delete old logo if exists
+                if ($organization->logo) {
+                    Storage::disk('public')->delete($organization->logo);
+                }
+                $validated['logo'] = $request->file('logo')->store('logos', 'public');
+            } else {
+                // Remove logo from validated data if no file was uploaded
+                // This ensures we don't accidentally set logo to null
+                if (isset($validated['logo'])) {
+                    unset($validated['logo']);
+                }
             }
-            $validated['logo'] = $request->file('logo')->store('logos', 'public');
+
+            $organization->update($validated);
+
+            return back()->with('success', '¡Cambios guardados!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Return validation errors properly for Inertia
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            Log::error('Error updating organization: ' . $e->getMessage(), [
+                'organization_id' => $organization->id,
+                'user_id' => $request->user()->id,
+                'exception' => $e,
+            ]);
+
+            return back()->with('error', 'Error al guardar los cambios. Por favor, intenta de nuevo.');
         }
-
-        $organization->update($validated);
-
-        return back()->with('success', '¡Cambios guardados!');
     }
 
     public function destroy(Request $request, Organization $organization)

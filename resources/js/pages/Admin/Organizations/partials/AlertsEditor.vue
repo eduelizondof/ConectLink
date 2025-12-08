@@ -11,6 +11,7 @@ import {
     AlertTriangle,
     CheckCircle,
     Megaphone,
+    Pencil,
 } from 'lucide-vue-next';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -33,6 +34,7 @@ const props = defineProps<{
 const swal = useSwal();
 const showAddModal = ref(false);
 const isUnmounting = ref(false);
+const editingAlert = ref<any>(null);
 
 const form = useForm({
     title: '',
@@ -91,6 +93,7 @@ function getTypeColor(type: string) {
 }
 
 function openAddModal() {
+    editingAlert.value = null;
     form.reset();
     form.type = 'info';
     form.position = 'bottom-right';
@@ -101,14 +104,41 @@ function openAddModal() {
     showAddModal.value = true;
 }
 
+function openEditModal(alert: any) {
+    editingAlert.value = alert;
+    form.title = alert.title || '';
+    form.message = alert.message;
+    form.type = alert.type;
+    form.link_url = alert.link_url || '';
+    form.link_text = alert.link_text || '';
+    form.position = alert.position;
+    form.animation = alert.animation;
+    form.background_color = alert.background_color || '';
+    form.is_dismissible = alert.is_dismissible;
+    form.show_on_load = alert.show_on_load;
+    form.delay_seconds = alert.delay_seconds || 3;
+    showAddModal.value = true;
+}
+
 function submitAdd() {
-    form.post(`/admin/profiles/${props.profile.id}/floating-alerts`, {
-        preserveScroll: true,
-        onSuccess: () => {
-            showAddModal.value = false;
-            swal.success('¡Alerta creada!');
-        },
-    });
+    if (editingAlert.value) {
+        form.put(`/admin/floating-alerts/${editingAlert.value.id}`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                showAddModal.value = false;
+                editingAlert.value = null;
+                swal.success('¡Alerta actualizada!');
+            },
+        });
+    } else {
+        form.post(`/admin/profiles/${props.profile.id}/floating-alerts`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                showAddModal.value = false;
+                swal.success('¡Alerta creada!');
+            },
+        });
+    }
 }
 
 async function deleteAlert(alert: any) {
@@ -178,6 +208,9 @@ function toggleActive(alert: any) {
                         :checked="alert.is_active"
                         @update:checked="toggleActive(alert)"
                     />
+                    <Button size="icon" variant="ghost" @click="openEditModal(alert)">
+                        <Pencil class="h-4 w-4 text-muted-foreground" />
+                    </Button>
                     <Button size="icon" variant="ghost" @click="deleteAlert(alert)">
                         <Trash2 class="h-4 w-4 text-destructive" />
                     </Button>
@@ -191,11 +224,11 @@ function toggleActive(alert: any) {
             <p>No hay alertas configuradas</p>
         </div>
 
-        <!-- Add Modal -->
+        <!-- Add/Edit Modal -->
         <Dialog v-model:open="showAddModal" :modal="true">
             <DialogContent v-if="!isUnmounting" class="max-w-lg max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>Nueva Alerta Flotante</DialogTitle>
+                    <DialogTitle>{{ editingAlert ? 'Editar Alerta Flotante' : 'Nueva Alerta Flotante' }}</DialogTitle>
                 </DialogHeader>
 
                 <form @submit.prevent="submitAdd" class="space-y-4">
@@ -332,7 +365,7 @@ function toggleActive(alert: any) {
                             Cancelar
                         </Button>
                         <Button type="submit" :disabled="form.processing">
-                            Crear Alerta
+                            {{ editingAlert ? 'Guardar Cambios' : 'Crear Alerta' }}
                         </Button>
                     </div>
                 </form>

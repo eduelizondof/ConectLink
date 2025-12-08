@@ -848,14 +848,23 @@ onMounted(() => {
 
         <!-- Floating Alerts -->
         <Teleport to="body">
-            <div
+            <component
                 v-for="alert in activeAlerts"
                 :key="alert.id"
-                class="fixed z-50 max-w-sm mx-4"
-                :class="[getAlertPositionClasses(alert.position), getAnimationClasses(alert.animation)]"
+                :is="alert.link_url ? 'a' : 'div'"
+                :href="alert.link_url || undefined"
+                :target="alert.link_url ? '_blank' : undefined"
+                :rel="alert.link_url ? 'noopener noreferrer' : undefined"
+                class="fixed z-50 max-w-sm mx-4 block"
+                :class="[
+                    getAlertPositionClasses(alert.position),
+                    getAnimationClasses(alert.animation),
+                    alert.link_url ? 'cursor-pointer' : '',
+                ]"
             >
                 <div
-                    class="rounded-xl p-4 shadow-2xl flex items-start gap-3"
+                    class="rounded-xl p-4 shadow-2xl flex items-start gap-3 transition-transform"
+                    :class="alert.link_url ? 'hover:scale-[1.02]' : ''"
                     :style="{
                         backgroundColor: alert.background_color,
                         color: alert.text_color || '#ffffff',
@@ -865,24 +874,23 @@ onMounted(() => {
                     <div class="flex-1 min-w-0">
                         <p v-if="alert.title" class="font-semibold text-sm mb-1">{{ alert.title }}</p>
                         <p class="text-sm opacity-90">{{ alert.message }}</p>
-                        <a
-                            v-if="alert.link_url"
-                            :href="alert.link_url"
+                        <span
+                            v-if="alert.link_url && alert.link_text"
                             class="inline-flex items-center gap-1 text-sm font-semibold mt-2 hover:underline"
                         >
-                            {{ alert.link_text || 'Ver más' }}
+                            {{ alert.link_text }}
                             <ChevronRight class="w-4 h-4" />
-                        </a>
+                        </span>
                     </div>
                     <button
                         v-if="alert.is_dismissible"
-                        @click="dismissAlert(alert.id)"
+                        @click.stop.prevent="dismissAlert(alert.id)"
                         class="p-1 rounded-full hover:bg-white/20 transition-colors"
                     >
                         <X class="w-4 h-4" />
                     </button>
                 </div>
-            </div>
+            </component>
         </Teleport>
 
         <!-- Product Modal -->
@@ -1077,6 +1085,20 @@ onMounted(() => {
 
 .animate-shake {
     animation: shake 0.5s ease-in-out infinite;
+}
+
+/* Soft bounce animation - more subtle than default */
+@keyframes soft-bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+.animate-bounce {
+    animation: soft-bounce 2s ease-in-out infinite;
 }
 
 /* Line clamp */

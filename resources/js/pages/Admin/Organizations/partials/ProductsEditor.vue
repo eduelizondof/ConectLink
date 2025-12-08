@@ -30,7 +30,10 @@ const props = defineProps<{
 const swal = useSwal();
 const showAddModal = ref(false);
 const showCategoryModal = ref(false);
+const showEditCategoryModal = ref(false);
 const isUnmounting = ref(false);
+const editingProduct = ref<any>(null);
+const editingCategory = ref<any>(null);
 
 const canAddMore = computed(() => (props.organization.products?.length ?? 0) < props.limits.max_products);
 
@@ -39,6 +42,7 @@ onBeforeUnmount(async () => {
     isUnmounting.value = true;
     showAddModal.value = false;
     showCategoryModal.value = false;
+    showEditCategoryModal.value = false;
     await nextTick();
 });
 
@@ -62,27 +66,80 @@ const categoryForm = useForm({
     description: '',
 });
 
+const editCategoryForm = useForm({
+    name: '',
+    slug: '',
+    description: '',
+    is_active: true,
+});
+
 function openAddProductModal() {
+    editingProduct.value = null;
     productForm.reset();
     productForm.currency = 'MXN';
     productForm.is_available = true;
     showAddModal.value = true;
 }
 
+function openEditProductModal(product: any) {
+    editingProduct.value = product;
+    productForm.name = product.name;
+    productForm.slug = product.slug || '';
+    productForm.category_id = product.category_id;
+    productForm.short_description = product.short_description || '';
+    productForm.description = product.description || '';
+    productForm.price = product.price;
+    productForm.sale_price = product.sale_price;
+    productForm.currency = product.currency || 'MXN';
+    productForm.image = null;
+    productForm.whatsapp_message = product.whatsapp_message || '';
+    productForm.is_featured = product.is_featured;
+    productForm.is_available = product.is_available;
+    showAddModal.value = true;
+}
+
 function openCategoryModal() {
+    editingCategory.value = null;
     categoryForm.reset();
     showCategoryModal.value = true;
 }
 
+function openEditCategoryModal(category: any) {
+    editingCategory.value = category;
+    editCategoryForm.name = category.name;
+    editCategoryForm.slug = category.slug || '';
+    editCategoryForm.description = category.description || '';
+    editCategoryForm.is_active = category.is_active ?? true;
+    showEditCategoryModal.value = true;
+}
+
 function submitProduct() {
-    productForm.post(`/admin/organizations/${props.organization.id}/products`, {
-        forceFormData: true,
-        preserveScroll: true,
-        onSuccess: () => {
-            showAddModal.value = false;
-            swal.success('¡Producto creado!');
-        },
-    });
+    if (editingProduct.value) {
+        // Use _method spoofing for PUT with file uploads
+        productForm
+            .transform((data) => ({
+                ...data,
+                _method: 'PUT',
+            }))
+            .post(`/admin/products/${editingProduct.value.id}`, {
+                forceFormData: true,
+                preserveScroll: true,
+                onSuccess: () => {
+                    showAddModal.value = false;
+                    editingProduct.value = null;
+                    swal.success('¡Producto actualizado!');
+                },
+            });
+    } else {
+        productForm.post(`/admin/organizations/${props.organization.id}/products`, {
+            forceFormData: true,
+            preserveScroll: true,
+            onSuccess: () => {
+                showAddModal.value = false;
+                swal.success('¡Producto creado!');
+            },
+        });
+    }
 }
 
 function submitCategory() {
@@ -91,6 +148,17 @@ function submitCategory() {
         onSuccess: () => {
             showCategoryModal.value = false;
             swal.success('¡Categoría creada!');
+        },
+    });
+}
+
+function submitEditCategory() {
+    editCategoryForm.put(`/admin/categories/${editingCategory.value.id}`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            showEditCategoryModal.value = false;
+            editingCategory.value = null;
+            swal.success('¡Categoría actualizada!');
         },
     });
 }
@@ -165,6 +233,9 @@ function formatPrice(price: number, currency: string) {
                 class="flex items-center gap-2 rounded-full border bg-muted px-3 py-1 text-sm"
             >
                 <span>{{ cat.name }}</span>
+                <button @click="openEditCategoryModal(cat)" class="text-muted-foreground hover:text-primary">
+                    <Pencil class="h-3 w-3" />
+                </button>
                 <button @click="deleteCategory(cat)" class="text-muted-foreground hover:text-destructive">
                     <Trash2 class="h-3 w-3" />
                 </button>
@@ -253,9 +324,14 @@ function formatPrice(price: number, currency: string) {
                         >
                             {{ product.is_available ? 'Disponible' : 'No disponible' }}
                         </span>
-                        <Button size="icon" variant="ghost" @click="deleteProduct(product)">
-                            <Trash2 class="h-4 w-4 text-destructive" />
-                        </Button>
+                        <div class="flex items-center gap-1">
+                            <Button size="icon" variant="ghost" @click="openEditProductModal(product)">
+                                <Pencil class="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                            <Button size="icon" variant="ghost" @click="deleteProduct(product)">
+                                <Trash2 class="h-4 w-4 text-destructive" />
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -272,16 +348,17 @@ function formatPrice(price: number, currency: string) {
             </Button>
         </div>
 
-        <!-- Add Product Modal -->
+        <!-- Add/Edit Product Modal -->
         <Dialog v-model:open="showAddModal" :modal="true">
             <DialogContent v-if="!isUnmounting" class="max-w-lg max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>Nuevo Producto</DialogTitle>
+                    <DialogTitle>{{ editingProduct ? 'Editar Producto' : 'Nuevo Producto' }}</DialogTitle>
                 </DialogHeader>
 
                 <form @submit.prevent="submitProduct" class="space-y-4">
                     <ImageUpload
                         v-model="productForm.image"
+                        :current-image="editingProduct?.image"
                         label="Imagen"
                         aspect-ratio="square"
                         :max-size="2"
@@ -398,7 +475,7 @@ function formatPrice(price: number, currency: string) {
                             Cancelar
                         </Button>
                         <Button type="submit" :disabled="productForm.processing">
-                            Crear Producto
+                            {{ editingProduct ? 'Guardar Cambios' : 'Crear Producto' }}
                         </Button>
                     </div>
                 </form>
@@ -438,6 +515,62 @@ function formatPrice(price: number, currency: string) {
                         </Button>
                         <Button type="submit" :disabled="categoryForm.processing">
                             Crear
+                        </Button>
+                    </div>
+                </form>
+            </DialogContent>
+        </Dialog>
+
+        <!-- Edit Category Modal -->
+        <Dialog v-model:open="showEditCategoryModal" :modal="true">
+            <DialogContent v-if="!isUnmounting" class="max-w-sm">
+                <DialogHeader>
+                    <DialogTitle>Editar Categoría</DialogTitle>
+                </DialogHeader>
+
+                <form @submit.prevent="submitEditCategory" class="space-y-4">
+                    <div class="space-y-2">
+                        <Label for="edit-category-name">Nombre *</Label>
+                        <Input
+                            id="edit-category-name"
+                            v-model="editCategoryForm.name"
+                            required
+                        />
+                    </div>
+
+                    <div class="space-y-2">
+                        <Label for="edit-category-slug">Slug</Label>
+                        <Input
+                            id="edit-category-slug"
+                            v-model="editCategoryForm.slug"
+                        />
+                    </div>
+
+                    <div class="space-y-2">
+                        <Label for="edit-category-description">Descripción</Label>
+                        <textarea
+                            id="edit-category-description"
+                            v-model="editCategoryForm.description"
+                            rows="2"
+                            class="w-full rounded-lg border bg-background px-4 py-3 text-sm"
+                        />
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <Checkbox
+                            id="edit-category-active"
+                            :checked="editCategoryForm.is_active"
+                            @update:checked="editCategoryForm.is_active = $event"
+                        />
+                        <Label for="edit-category-active" class="cursor-pointer">Activa</Label>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-2">
+                        <Button type="button" variant="outline" @click="showEditCategoryModal = false">
+                            Cancelar
+                        </Button>
+                        <Button type="submit" :disabled="editCategoryForm.processing">
+                            Guardar
                         </Button>
                     </div>
                 </form>
