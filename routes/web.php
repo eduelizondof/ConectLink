@@ -32,6 +32,15 @@ require __DIR__.'/admin.php';
 Route::post('/api/links/{link}/click', [ProfilePageController::class, 'trackClick'])
     ->name('links.track');
 
+// Public QR data endpoint (for generating QR on client)
+Route::get('/api/{orgSlug}/qr-data', [ProfilePageController::class, 'getQrData'])
+    ->name('profile.qr-data')
+    ->where('orgSlug', '[a-z0-9\-]+');
+
+Route::get('/api/{orgSlug}/{profileSlug}/qr-data', [ProfilePageController::class, 'getQrData'])
+    ->name('profile.employee.qr-data')
+    ->where(['orgSlug' => '[a-z0-9\-]+', 'profileSlug' => '[a-z0-9\-]+']);
+
 // Download vCard - Organization primary profile
 Route::get('/{orgSlug}/vcard', [ProfilePageController::class, 'downloadVcard'])
     ->name('profile.vcard')

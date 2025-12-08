@@ -217,6 +217,58 @@ class ProfilePageController extends Controller
     }
 
     /**
+     * Get QR data for a profile (public endpoint).
+     */
+    public function getQrData(Request $request, string $orgSlug, ?string $profileSlug = null)
+    {
+        $organization = Organization::query()
+            ->where('slug', $orgSlug)
+            ->where('is_active', true)
+            ->firstOrFail();
+
+        if ($profileSlug) {
+            $profile = Profile::query()
+                ->where('organization_id', $organization->id)
+                ->where('slug', $profileSlug)
+                ->where('is_active', true)
+                ->with('qrSettings')
+                ->firstOrFail();
+        } else {
+            $profile = $organization->primaryProfile()
+                ->where('is_active', true)
+                ->with('qrSettings')
+                ->firstOrFail();
+        }
+
+        $settings = $profile->qrSettings ?? new \App\Models\QrSetting(\App\Models\QrSetting::getDefaults());
+
+        return response()->json([
+            'url' => $profile->url,
+            'settings' => [
+                'foreground_color' => $settings->foreground_color ?? '#000000',
+                'background_color' => $settings->background_color ?? '#FFFFFF',
+                'dot_style' => $settings->dot_style ?? 'square',
+                'corner_style' => $settings->corner_style ?? 'square',
+                'corner_color' => $settings->corner_color,
+                'show_logo' => $settings->show_logo ?? false,
+                'logo_url' => $settings->logo_url,
+                'logo_size' => $settings->logo_size ?? 20,
+                'logo_shape' => $settings->logo_shape ?? 'circle',
+                'logo_background_color' => $settings->logo_background_color ?? '#FFFFFF',
+                'logo_background_enabled' => $settings->logo_background_enabled ?? true,
+                'logo_margin' => $settings->logo_margin ?? 5,
+                'error_correction' => $settings->error_correction ?? 'H',
+                'size' => $settings->size ?? 300,
+                'use_gradient' => $settings->use_gradient ?? false,
+                'gradient_start_color' => $settings->gradient_start_color,
+                'gradient_end_color' => $settings->gradient_end_color,
+                'gradient_type' => $settings->gradient_type ?? 'linear',
+                'gradient_rotation' => $settings->gradient_rotation ?? 0,
+            ],
+        ]);
+    }
+
+    /**
      * Record a profile view.
      */
     protected function recordProfileView(Request $request, Profile $profile): void

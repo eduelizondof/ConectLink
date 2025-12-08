@@ -135,6 +135,14 @@ class Profile extends Model
     }
 
     /**
+     * Get QR settings for this profile.
+     */
+    public function qrSettings(): HasOne
+    {
+        return $this->hasOne(QrSetting::class);
+    }
+
+    /**
      * Get all views for this profile.
      */
     public function views(): HasMany

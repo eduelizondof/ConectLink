@@ -15,6 +15,7 @@ import {
     Eye,
     ExternalLink,
     Settings,
+    QrCode,
 } from 'lucide-vue-next';
 import { RadioCard } from '@/components/ui/radio-card';
 import { ImageUpload } from '@/components/ui/image-upload';
@@ -35,6 +36,7 @@ import ProductsEditor from './partials/ProductsEditor.vue';
 import SocialLinksEditor from './partials/SocialLinksEditor.vue';
 import CustomLinksEditor from './partials/CustomLinksEditor.vue';
 import AlertsEditor from './partials/AlertsEditor.vue';
+import QrEditor from './partials/QrEditor.vue';
 
 interface Organization {
     id: number;
@@ -223,6 +225,10 @@ watch(() => props.organization.profiles, (profiles) => {
                     <TabsTrigger value="alerts" class="gap-2">
                         <Bell class="h-4 w-4" />
                         <span class="hidden sm:inline">Alertas</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="qr" class="gap-2">
+                        <QrCode class="h-4 w-4" />
+                        <span class="hidden sm:inline">QR & Tarjetas</span>
                     </TabsTrigger>
                 </TabsList>
 
@@ -465,6 +471,30 @@ watch(() => props.organization.profiles, (profiles) => {
                                 :organization="organization"
                             />
                         </div>
+                    </div>
+                </TabsContent>
+
+                <!-- QR & Business Cards Tab -->
+                <TabsContent value="qr">
+                    <div class="space-y-6">
+                        <!-- Profile Selector -->
+                        <div class="flex items-center gap-4 rounded-xl border bg-card p-4">
+                            <Label>Perfil seleccionado:</Label>
+                            <select
+                                v-model="selectedProfileId"
+                                class="rounded-lg border bg-background px-3 py-2 text-sm"
+                            >
+                                <option v-for="profile in organization.profiles" :key="profile.id" :value="profile.id">
+                                    {{ profile.name }} {{ profile.is_primary ? '(Principal)' : '' }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <QrEditor
+                            v-if="selectedProfile"
+                            :profile="selectedProfile"
+                            :organization="organization"
+                        />
                     </div>
                 </TabsContent>
             </Tabs>

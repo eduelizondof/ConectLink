@@ -95,7 +95,7 @@ class OrganizationController extends Controller
 
         $organization->load([
             'profiles' => function ($query) {
-                $query->with(['settings', 'socialLinks', 'customLinks', 'floatingAlerts', 'vcardSettings'])
+                $query->with(['settings', 'socialLinks', 'customLinks', 'floatingAlerts', 'vcardSettings', 'qrSettings'])
                     ->orderBy('is_primary', 'desc')
                     ->orderBy('created_at', 'asc');
             },

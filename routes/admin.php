@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\PlansController;
 use App\Http\Controllers\Admin\ProductCategoryController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\QrBusinessCardController;
 use App\Http\Controllers\Admin\SocialLinkController;
 use App\Http\Controllers\Admin\VcardController;
 use Illuminate\Support\Facades\Route;
@@ -64,6 +65,14 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
 
     // vCard
     Route::put('/profiles/{profile}/vcard', [VcardController::class, 'update'])->name('vcard.update');
+
+    // QR Code & Business Cards
+    Route::put('/profiles/{profile}/qr-settings', [QrBusinessCardController::class, 'updateQrSettings'])->name('qr.update');
+    Route::get('/profiles/{profile}/qr-config', [QrBusinessCardController::class, 'getQrConfig'])->name('qr.config');
+    Route::get('/profiles/{profile}/qr-generate', [QrBusinessCardController::class, 'generateQr'])->name('qr.generate');
+    Route::get('/profiles/{profile}/qr-download', [QrBusinessCardController::class, 'downloadQr'])->name('qr.download');
+    Route::get('/profiles/{profile}/business-card', [QrBusinessCardController::class, 'generateBusinessCard'])->name('business-card.download');
+    Route::get('/profiles/{profile}/business-card/preview', [QrBusinessCardController::class, 'previewBusinessCard'])->name('business-card.preview');
 
     // Product Categories
     Route::post('/organizations/{organization}/categories', [ProductCategoryController::class, 'store'])->name('categories.store');
