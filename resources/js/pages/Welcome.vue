@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { dashboard, login, register } from '@/routes';
+import { dashboard, login } from '@/routes';
 import Globe3D from '@/components/landing/Globe3D.vue';
 import ParticlesBackground from '@/components/landing/ParticlesBackground.vue';
 import { Head, Link } from '@inertiajs/vue3';
@@ -152,7 +152,7 @@ const navLinks = [
                         </Link>
                         <Link
                             v-if="canRegister"
-                            :href="register()"
+                            :href="login()"
                             class="btn-glow rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg"
                         >
                             Crear cuenta
@@ -220,8 +220,8 @@ const navLinks = [
         <main class="relative z-10">
             
             <!-- Hero Section -->
-            <section id="hero" class="flex min-h-screen flex-col items-center justify-center px-4 pb-24 pt-20 lg:pt-28">
-                <div class="mx-auto max-w-6xl text-center">
+            <section id="hero" class="flex min-h-screen flex-col items-center justify-center px-4 pb-24 pt-20 lg:pt-28 overflow-visible">
+                <div class="mx-auto max-w-6xl text-center overflow-visible">
                     
                     <!-- Badge -->
                     <div 
@@ -260,7 +260,7 @@ const navLinks = [
                     >
                         <Link
                             v-if="!$page.props.auth.user && canRegister"
-                            :href="register()"
+                            :href="login()"
                             class="btn-glow group flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-600 px-8 py-4 text-lg font-semibold text-white shadow-lg"
                         >
                             <Sparkles class="h-5 w-5" />
@@ -285,11 +285,11 @@ const navLinks = [
 
                     <!-- Globe 3D -->
                     <div 
-                        class="relative mx-auto"
+                        class="relative mx-auto overflow-visible"
                         :class="{ 'scale-in': isLoaded }"
-                        style="animation-delay: 0.5s;"
+                        style="animation-delay: 0.5s; min-height: 360px; padding: 20px 0;"
                     >
-                        <Globe3D :size="320" class="mx-auto" />
+                        <Globe3D :size="300" class="mx-auto" />
                         
                         <!-- Text under globe -->
                         <div class="mt-4 flex items-center justify-center gap-2">
@@ -380,7 +380,7 @@ const navLinks = [
                     <div class="mt-12 text-center">
                         <Link
                             v-if="!$page.props.auth.user && canRegister"
-                            :href="register()"
+                            :href="login()"
                             class="btn-glow inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-600 px-8 py-4 text-lg font-semibold text-white shadow-lg"
                         >
                             <Sparkles class="h-5 w-5" />
@@ -442,7 +442,7 @@ const navLinks = [
                             <div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
                                 <Link
                                     v-if="!$page.props.auth.user && canRegister"
-                                    :href="register()"
+                                    :href="login()"
                                     class="btn-glow group flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-600 px-8 py-4 text-lg font-semibold text-white shadow-lg"
                                 >
                                     <Sparkles class="h-5 w-5" />

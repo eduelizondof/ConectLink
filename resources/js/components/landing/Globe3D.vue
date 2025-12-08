@@ -223,8 +223,8 @@ watch(() => props.size, () => {
 <template>
     <div 
         ref="containerRef" 
-        class="globe-container relative flex items-center justify-center"
-        :style="{ width: `${size}px`, height: `${size}px` }"
+        class="globe-container relative flex items-center justify-center overflow-visible"
+        :style="{ width: `${size}px`, height: `${size}px`, minHeight: `${size}px` }"
     >
         <!-- Glow effect behind globe -->
         <div 
