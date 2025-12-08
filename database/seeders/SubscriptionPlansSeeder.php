@@ -122,3 +122,4 @@ class SubscriptionPlansSeeder extends Seeder
 }
 
 
+

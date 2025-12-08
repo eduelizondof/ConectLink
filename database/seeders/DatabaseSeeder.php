@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Seed ConectLink demo data
-        $this->call(ConectLinkSeeder::class);
+        $this->call([ConectLinkSeeder::class,
+        SubscriptionPlansSeeder::class]);
     }
 }

@@ -144,7 +144,7 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // Features::registration(), // Disabled - use artisan account:create instead
         Features::resetPasswords(),
         Features::emailVerification(),
         Features::twoFactorAuthentication([

@@ -10,6 +10,8 @@ use App\Models\ProductCategory;
 use App\Models\Profile;
 use App\Models\ProfileSetting;
 use App\Models\SocialLink;
+use App\Models\Subscription;
+use App\Models\SubscriptionPlan;
 use App\Models\User;
 use App\Models\VcardSetting;
 use Illuminate\Database\Seeder;
@@ -528,6 +530,35 @@ class ConectLinkSeeder extends Seeder
             'is_active' => true,
             'include_photo' => true,
         ]);
+
+        // =========================================
+        // SUBSCRIPTIONS - Annual plans for all users
+        // =========================================
+        $empresarialPlan = SubscriptionPlan::where('slug', 'empresarial')->first();
+
+        if ($empresarialPlan) {
+            $users = [$owner, $vendedor, $ceo];
+
+            foreach ($users as $user) {
+                Subscription::updateOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'plan_id' => $empresarialPlan->id,
+                        'billing_cycle' => 'annual',
+                        'amount_paid' => $empresarialPlan->price_annual,
+                        'currency' => 'USD',
+                        'status' => 'active',
+                        'starts_at' => now(),
+                        'ends_at' => now()->addYear(),
+                        'payment_method' => 'manual',
+                        'payment_reference' => 'SEED-' . strtoupper(Str::random(8)),
+                        'notes' => 'Suscripción demo creada por seeder',
+                    ]
+                );
+            }
+
+            $this->command->info('  - Subscriptions: 3 annual Empresarial plans');
+        }
 
         $this->command->info('✅ ConectLink seeder completed!');
         $this->command->info('');
