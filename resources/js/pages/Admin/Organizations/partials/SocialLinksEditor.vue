@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed, onBeforeUnmount, nextTick } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { useSwal } from '@/composables/useSwal';
 import {
@@ -38,6 +38,7 @@ const props = defineProps<{
 
 const swal = useSwal();
 const showAddModal = ref(false);
+const isUnmounting = ref(false);
 
 const form = useForm({
     platform: '',
@@ -45,7 +46,14 @@ const form = useForm({
     label: '',
 });
 
-const canAddMore = (props.profile.social_links?.length || 0) < props.maxLinks;
+const canAddMore = computed(() => (props.profile.social_links?.length || 0) < props.maxLinks);
+
+// Close modals before unmounting to prevent Vue DOM errors
+onBeforeUnmount(async () => {
+    isUnmounting.value = true;
+    showAddModal.value = false;
+    await nextTick();
+});
 
 const platformIcons: Record<string, any> = {
     facebook: Facebook,
@@ -161,8 +169,8 @@ function toggleActive(link: any) {
         </div>
 
         <!-- Add Modal -->
-        <Dialog v-model:open="showAddModal">
-            <DialogContent class="max-w-md">
+        <Dialog v-model:open="showAddModal" :modal="true">
+            <DialogContent v-if="!isUnmounting" class="max-w-md">
                 <DialogHeader>
                     <DialogTitle>Agregar Red Social</DialogTitle>
                 </DialogHeader>

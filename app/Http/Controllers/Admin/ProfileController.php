@@ -82,66 +82,99 @@ class ProfileController extends Controller
 
     public function updateSettings(Request $request, Profile $profile)
     {
-        $this->authorize('update', $profile->organization);
+        try {
+            $this->authorize('update', $profile->organization);
 
-        $validated = $request->validate([
-            // Background
-            'background_type' => ['required', 'in:solid,gradient,image'],
-            'background_color' => ['nullable', 'string', 'max:7'],
-            'background_gradient_start' => ['nullable', 'string', 'max:7'],
-            'background_gradient_end' => ['nullable', 'string', 'max:7'],
-            'background_gradient_direction' => ['nullable', 'in:to-b,to-r,to-br,to-bl'],
-            'background_image' => ['nullable', 'image', 'max:4096'],
-            'background_overlay_opacity' => ['nullable', 'integer', 'min:0', 'max:100'],
+            \Log::info('Updating settings for profile: ' . $profile->id, $request->all());
 
-            // Colors
-            'primary_color' => ['nullable', 'string', 'max:7'],
-            'secondary_color' => ['nullable', 'string', 'max:7'],
-            'text_color' => ['nullable', 'string', 'max:7'],
-            'text_secondary_color' => ['nullable', 'string', 'max:7'],
+            $validated = $request->validate([
+                // Background
+                'background_type' => ['nullable', 'in:solid,gradient,image'],
+                'background_color' => ['nullable', 'string', 'max:7'],
+                'background_gradient_start' => ['nullable', 'string', 'max:7'],
+                'background_gradient_end' => ['nullable', 'string', 'max:7'],
+                'background_gradient_direction' => ['nullable', 'in:to-b,to-r,to-br,to-bl'],
+                'background_image' => ['nullable', 'image', 'max:4096'],
+                'background_overlay_opacity' => ['nullable', 'integer', 'min:0', 'max:100'],
+                'background_pattern' => ['nullable', 'in:none,dots,grid,waves,noise'],
+                'background_pattern_opacity' => ['nullable', 'integer', 'min:0', 'max:100'],
 
-            // Card
-            'card_style' => ['nullable', 'in:solid,transparent,glass'],
-            'card_background_color' => ['nullable', 'string', 'max:50'],
-            'card_border_radius' => ['nullable', 'in:none,sm,md,lg,xl,2xl,full'],
-            'card_shadow' => ['nullable', 'boolean'],
-            'card_border_color' => ['nullable', 'string', 'max:50'],
+                // Colors
+                'primary_color' => ['nullable', 'string', 'max:7'],
+                'secondary_color' => ['nullable', 'string', 'max:7'],
+                'text_color' => ['nullable', 'string', 'max:7'],
+                'text_secondary_color' => ['nullable', 'string', 'max:7'],
 
-            // Typography
-            'font_family' => ['nullable', 'string', 'max:50'],
-            'font_size' => ['nullable', 'in:sm,base,lg'],
+                // Card
+                'card_style' => ['nullable', 'in:solid,transparent,glass'],
+                'card_background_color' => ['nullable', 'string', 'max:50'],
+                'card_border_radius' => ['nullable', 'in:none,sm,md,lg,xl,2xl,full'],
+                'card_shadow' => ['boolean'],
+                'card_border_color' => ['nullable', 'string', 'max:50'],
+                'card_glow_enabled' => ['boolean'],
+                'card_glow_color' => ['nullable', 'string', 'max:7'],
+                'card_glow_color_secondary' => ['nullable', 'string', 'max:7'],
+                'card_glow_variant' => ['nullable', 'in:default,cyan,purple,rainbow,primary'],
 
-            // Animations
-            'animation_entrance' => ['nullable', 'in:none,fade,slide-up,slide-down,scale,bounce'],
-            'animation_hover' => ['nullable', 'in:none,lift,glow,pulse,shake'],
-            'animation_delay' => ['nullable', 'integer', 'min:0', 'max:500'],
+                // Typography
+                'font_family' => ['nullable', 'string', 'max:50'],
+                'font_size' => ['nullable', 'in:sm,base,lg'],
 
-            // Layout
-            'layout_style' => ['nullable', 'in:centered,left,compact'],
-            'show_profile_photo' => ['nullable', 'boolean'],
-            'photo_style' => ['nullable', 'in:circle,rounded,square'],
-            'photo_size' => ['nullable', 'in:sm,md,lg,xl'],
+                // Animations
+                'animation_entrance' => ['nullable', 'in:none,fade,slide-up,slide-down,scale,bounce'],
+                'animation_hover' => ['nullable', 'in:none,lift,glow,pulse,shake'],
+                'animation_delay' => ['nullable', 'integer', 'min:0', 'max:500'],
 
-            // Social
-            'social_style' => ['nullable', 'in:icons,buttons,pills'],
-            'social_size' => ['nullable', 'in:sm,md,lg'],
-            'social_colored' => ['nullable', 'boolean'],
-        ]);
+                // Visual Effects
+                'show_particles' => ['boolean'],
+                'particles_style' => ['nullable', 'in:dots,lines,confetti,snow'],
+                'particles_color' => ['nullable', 'string', 'max:7'],
 
-        if ($request->hasFile('background_image')) {
-            $settings = $profile->settings;
-            if ($settings && $settings->background_image) {
-                \Storage::disk('public')->delete($settings->background_image);
+                // Layout
+                'layout_style' => ['nullable', 'in:centered,left,compact'],
+                'show_profile_photo' => ['boolean'],
+                'photo_style' => ['nullable', 'in:circle,rounded,square'],
+                'photo_size' => ['nullable', 'in:sm,md,lg,xl'],
+
+                // Social
+                'social_style' => ['nullable', 'in:icons,buttons,pills'],
+                'social_size' => ['nullable', 'in:sm,md,lg'],
+                'social_colored' => ['boolean'],
+            ]);
+
+            // Set default background_type if not provided
+            $validated['background_type'] = $validated['background_type'] ?? 'solid';
+            
+            \Log::info('Validated data:', $validated);
+
+            if ($request->hasFile('background_image')) {
+                $settings = $profile->settings;
+                if ($settings && $settings->background_image) {
+                    \Storage::disk('public')->delete($settings->background_image);
+                }
+                $validated['background_image'] = $request->file('background_image')->store('backgrounds', 'public');
             }
-            $validated['background_image'] = $request->file('background_image')->store('backgrounds', 'public');
+
+            // Filter out null values to prevent overwriting with nulls
+            $filteredData = array_filter($validated, fn($value) => $value !== null && $value !== '');
+            
+            $profile->settings()->updateOrCreate(
+                ['profile_id' => $profile->id],
+                $filteredData
+            );
+
+            \Log::info('Settings saved successfully for profile: ' . $profile->id);
+
+            return back()->with('success', '¡Configuración guardada!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Validation error in updateSettings: ', $e->errors());
+            throw $e;
+        } catch (\Exception $e) {
+            \Log::error('Error in updateSettings: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+            return back()->with('error', 'Error al guardar: ' . $e->getMessage());
         }
-
-        $profile->settings()->updateOrCreate(
-            ['profile_id' => $profile->id],
-            $validated
-        );
-
-        return back()->with('success', '¡Configuración guardada!');
     }
 
     public function destroy(Request $request, Profile $profile)

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed, onBeforeUnmount, nextTick } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { useSwal } from '@/composables/useSwal';
 import {
@@ -36,8 +36,17 @@ const emit = defineEmits<{
 const swal = useSwal();
 const showCreateModal = ref(false);
 const editingProfile = ref<any>(null);
+const isUnmounting = ref(false);
 
-const canCreateProfile = props.organization.profiles.length < props.limits.max_profiles;
+const canCreateProfile = computed(() => props.organization.profiles.length < props.limits.max_profiles);
+
+// Close modals before unmounting to prevent Vue DOM errors
+onBeforeUnmount(async () => {
+    isUnmounting.value = true;
+    showCreateModal.value = false;
+    editingProfile.value = null;
+    await nextTick();
+});
 
 // Create form
 const createForm = useForm({
@@ -209,8 +218,8 @@ async function deleteProfile(profile: any) {
         </div>
 
         <!-- Create Profile Modal -->
-        <Dialog v-model:open="showCreateModal">
-            <DialogContent class="max-w-lg">
+        <Dialog v-model:open="showCreateModal" :modal="true">
+            <DialogContent v-if="!isUnmounting" class="max-w-lg">
                 <DialogHeader>
                     <DialogTitle>Nuevo Perfil</DialogTitle>
                     <DialogDescription>
@@ -286,8 +295,8 @@ async function deleteProfile(profile: any) {
         </Dialog>
 
         <!-- Edit Profile Modal -->
-        <Dialog :open="!!editingProfile" @update:open="closeEditModal">
-            <DialogContent class="max-w-lg">
+        <Dialog :open="!!editingProfile && !isUnmounting" @update:open="closeEditModal" :modal="true">
+            <DialogContent v-if="!isUnmounting" class="max-w-lg">
                 <DialogHeader>
                     <DialogTitle>Editar Perfil</DialogTitle>
                 </DialogHeader>

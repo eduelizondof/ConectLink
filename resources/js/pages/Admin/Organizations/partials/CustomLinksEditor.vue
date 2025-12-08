@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed, onBeforeUnmount, nextTick } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { useSwal } from '@/composables/useSwal';
 import {
@@ -28,6 +28,7 @@ const props = defineProps<{
 
 const swal = useSwal();
 const showAddModal = ref(false);
+const isUnmounting = ref(false);
 
 const form = useForm({
     title: '',
@@ -38,7 +39,14 @@ const form = useForm({
     is_highlighted: false,
 });
 
-const canAddMore = (props.profile.custom_links?.length || 0) < props.maxLinks;
+const canAddMore = computed(() => (props.profile.custom_links?.length || 0) < props.maxLinks);
+
+// Close modals before unmounting to prevent Vue DOM errors
+onBeforeUnmount(async () => {
+    isUnmounting.value = true;
+    showAddModal.value = false;
+    await nextTick();
+});
 
 function openAddModal() {
     form.reset();
@@ -157,8 +165,8 @@ function toggleHighlight(link: any) {
         </div>
 
         <!-- Add Modal -->
-        <Dialog v-model:open="showAddModal">
-            <DialogContent class="max-w-md">
+        <Dialog v-model:open="showAddModal" :modal="true">
+            <DialogContent v-if="!isUnmounting" class="max-w-md">
                 <DialogHeader>
                     <DialogTitle>Agregar Link</DialogTitle>
                 </DialogHeader>

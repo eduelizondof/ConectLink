@@ -11,27 +11,13 @@ import {
     Package,
     Link2,
     Bell,
-    CreditCard,
     Save,
-    Plus,
-    Trash2,
-    GripVertical,
     Eye,
     ExternalLink,
     Settings,
-    Share2,
-    Image,
-    Type,
-    Sparkles,
-    MessageCircle,
-    Globe,
-    Mail,
-    Phone,
-    ChevronDown,
 } from 'lucide-vue-next';
 import { RadioCard } from '@/components/ui/radio-card';
 import { ImageUpload } from '@/components/ui/image-upload';
-import { ColorPicker } from '@/components/ui/color-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -44,6 +30,7 @@ import {
 } from '@/components/ui/tabs';
 import ProfilePreview from './partials/ProfilePreview.vue';
 import ProfileEditor from './partials/ProfileEditor.vue';
+import DesignEditor from './partials/DesignEditor.vue';
 import ProductsEditor from './partials/ProductsEditor.vue';
 import SocialLinksEditor from './partials/SocialLinksEditor.vue';
 import CustomLinksEditor from './partials/CustomLinksEditor.vue';
@@ -351,62 +338,11 @@ watch(() => props.organization.profiles, (profiles) => {
 
                 <!-- Design Tab -->
                 <TabsContent value="design">
-                    <div class="grid gap-6 lg:grid-cols-2">
-                        <!-- Design Options -->
-                        <div class="space-y-6 rounded-xl border bg-card p-6">
-                            <div class="flex items-center justify-between">
-                                <h2 class="font-semibold">Personalización Visual</h2>
-                                <select
-                                    v-model="selectedProfileId"
-                                    class="rounded-lg border bg-background px-3 py-1.5 text-sm"
-                                >
-                                    <option v-for="profile in organization.profiles" :key="profile.id" :value="profile.id">
-                                        {{ profile.name }} {{ profile.is_primary ? '(Principal)' : '' }}
-                                    </option>
-                                </select>
-                            </div>
-
-                            <div v-if="selectedProfile?.settings" class="space-y-8">
-                                <!-- Background Section -->
-                                <div class="space-y-4">
-                                    <h3 class="text-sm font-medium text-muted-foreground uppercase tracking-wide">Fondo</h3>
-                                    <!-- Background type selection would go here -->
-                                    <p class="text-sm text-muted-foreground">
-                                        Personaliza el fondo de tu perfil con colores sólidos, gradientes o imágenes.
-                                    </p>
-                                </div>
-
-                                <!-- Colors Section -->
-                                <div class="space-y-4">
-                                    <h3 class="text-sm font-medium text-muted-foreground uppercase tracking-wide">Colores</h3>
-                                    <div class="grid gap-4 sm:grid-cols-2">
-                                        <ColorPicker
-                                            :model-value="selectedProfile.settings.primary_color || '#3b82f6'"
-                                            label="Color Principal"
-                                        />
-                                        <ColorPicker
-                                            :model-value="selectedProfile.settings.secondary_color || '#8b5cf6'"
-                                            label="Color Secundario"
-                                        />
-                                    </div>
-                                </div>
-
-                                <p class="text-sm text-muted-foreground bg-muted p-4 rounded-lg">
-                                    💡 Esta sección completa estará disponible pronto. Por ahora puedes personalizar los colores básicos.
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- Preview -->
-                        <div class="space-y-4">
-                            <h2 class="font-semibold">Vista Previa</h2>
-                            <ProfilePreview
-                                v-if="selectedProfile"
-                                :profile="selectedProfile"
-                                :organization="organization"
-                            />
-                        </div>
-                    </div>
+                    <DesignEditor
+                        :organization="organization"
+                        :selected-profile-id="selectedProfileId"
+                        @select-profile="selectedProfileId = $event"
+                    />
                 </TabsContent>
 
                 <!-- Links Tab -->

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed, onBeforeUnmount, nextTick, watch } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { useSwal } from '@/composables/useSwal';
 import {
@@ -30,8 +30,17 @@ const props = defineProps<{
 const swal = useSwal();
 const showAddModal = ref(false);
 const showCategoryModal = ref(false);
+const isUnmounting = ref(false);
 
-const canAddMore = props.organization.products.length < props.limits.max_products;
+const canAddMore = computed(() => props.organization.products.length < props.limits.max_products);
+
+// Close modals before unmounting to prevent Vue DOM errors
+onBeforeUnmount(async () => {
+    isUnmounting.value = true;
+    showAddModal.value = false;
+    showCategoryModal.value = false;
+    await nextTick();
+});
 
 const productForm = useForm({
     name: '',
@@ -264,8 +273,8 @@ function formatPrice(price: number, currency: string) {
         </div>
 
         <!-- Add Product Modal -->
-        <Dialog v-model:open="showAddModal">
-            <DialogContent class="max-w-lg max-h-[90vh] overflow-y-auto">
+        <Dialog v-model:open="showAddModal" :modal="true">
+            <DialogContent v-if="!isUnmounting" class="max-w-lg max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Nuevo Producto</DialogTitle>
                 </DialogHeader>
@@ -397,8 +406,8 @@ function formatPrice(price: number, currency: string) {
         </Dialog>
 
         <!-- Add Category Modal -->
-        <Dialog v-model:open="showCategoryModal">
-            <DialogContent class="max-w-sm">
+        <Dialog v-model:open="showCategoryModal" :modal="true">
+            <DialogContent v-if="!isUnmounting" class="max-w-sm">
                 <DialogHeader>
                     <DialogTitle>Nueva Categoría</DialogTitle>
                 </DialogHeader>

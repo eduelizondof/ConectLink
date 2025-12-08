@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed, onBeforeUnmount, nextTick } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { useSwal } from '@/composables/useSwal';
 import {
@@ -32,6 +32,7 @@ const props = defineProps<{
 
 const swal = useSwal();
 const showAddModal = ref(false);
+const isUnmounting = ref(false);
 
 const form = useForm({
     title: '',
@@ -47,7 +48,14 @@ const form = useForm({
     delay_seconds: 3,
 });
 
-const canAddMore = (props.profile.floating_alerts?.length || 0) < props.maxAlerts;
+const canAddMore = computed(() => (props.profile.floating_alerts?.length || 0) < props.maxAlerts);
+
+// Close modals before unmounting to prevent Vue DOM errors
+onBeforeUnmount(async () => {
+    isUnmounting.value = true;
+    showAddModal.value = false;
+    await nextTick();
+});
 
 const alertTypes = [
     { value: 'info', label: 'Info', icon: Info, color: '#3B82F6' },
@@ -184,8 +192,8 @@ function toggleActive(alert: any) {
         </div>
 
         <!-- Add Modal -->
-        <Dialog v-model:open="showAddModal">
-            <DialogContent class="max-w-lg max-h-[90vh] overflow-y-auto">
+        <Dialog v-model:open="showAddModal" :modal="true">
+            <DialogContent v-if="!isUnmounting" class="max-w-lg max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Nueva Alerta Flotante</DialogTitle>
                 </DialogHeader>
