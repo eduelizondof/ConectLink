@@ -41,6 +41,7 @@ interface Organization {
     name: string;
     slug: string;
     logo?: string;
+    logo_url?: string;
     type: string;
     description?: string;
     is_active: boolean;
@@ -89,21 +90,26 @@ const orgForm = useForm({
 });
 
 function saveOrganization() {
-    // If logo is a File, we need to use FormData
-    // Otherwise, send as JSON (normal Inertia request)
+    // If logo is a File, we need to use FormData with POST and _method spoofing
+    // This is required because HTML forms don't support PUT with file uploads
     if (orgForm.logo instanceof File) {
-        orgForm.put(`/admin/organizations/${props.organization.id}`, {
-            forceFormData: true,
-            preserveScroll: true,
-            onSuccess: () => {
-                swal.success('¡Cambios guardados!');
-                orgForm.logo = null;
-            },
-            onError: (errors) => {
-                console.error('Error al guardar:', errors);
-                swal.error('Error al guardar los cambios. Por favor, verifica los datos.');
-            },
-        });
+        orgForm
+            .transform((data) => ({
+                ...data,
+                _method: 'PUT',
+            }))
+            .post(`/admin/organizations/${props.organization.id}`, {
+                forceFormData: true,
+                preserveScroll: true,
+                onSuccess: () => {
+                    swal.success('¡Cambios guardados!');
+                    orgForm.logo = null;
+                },
+                onError: (errors) => {
+                    console.error('Error al guardar:', errors);
+                    swal.error('Error al guardar los cambios. Por favor, verifica los datos.');
+                },
+            });
     } else {
         // When no file, exclude logo from submission and send as JSON
         orgForm.transform((data) => {
@@ -153,8 +159,8 @@ watch(() => props.organization.profiles, (profiles) => {
                 <div class="flex items-center gap-4">
                     <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500/20 to-cyan-600/20">
                         <img
-                            v-if="organization.logo"
-                            :src="`/storage/${organization.logo}`"
+                            v-if="organization.logo_url"
+                            :src="organization.logo_url"
                             :alt="organization.name"
                             class="h-full w-full rounded-xl object-cover"
                         />
@@ -231,7 +237,7 @@ watch(() => props.organization.profiles, (profiles) => {
                                 <!-- Logo -->
                                 <ImageUpload
                                     v-model="orgForm.logo"
-                                    :current-image="organization.logo"
+                                    :current-image="organization.logo_url"
                                     label="Logo"
                                     aspect-ratio="square"
                                     :max-size="2"

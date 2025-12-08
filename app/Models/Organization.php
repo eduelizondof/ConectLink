@@ -24,6 +24,10 @@ class Organization extends Model
         'is_verified',
     ];
 
+    protected $appends = [
+        'logo_url',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -102,6 +106,18 @@ class Organization extends Model
     public function getUrlAttribute(): string
     {
         return config('app.url') . '/' . $this->slug;
+    }
+
+    /**
+     * Get the full URL for the organization's logo.
+     */
+    public function getLogoUrlAttribute(): ?string
+    {
+        if (!$this->logo) {
+            return null;
+        }
+
+        return asset('storage/' . $this->logo);
     }
 }
 

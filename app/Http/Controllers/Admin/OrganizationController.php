@@ -122,9 +122,23 @@ class OrganizationController extends Controller
 
     public function update(Request $request, Organization $organization)
     {
+        Log::info('Organization update request started', [
+            'organization_id' => $organization->id,
+            'user_id' => $request->user()?->id,
+            'has_file' => $request->hasFile('logo'),
+            'method' => $request->method(),
+            'content_type' => $request->header('Content-Type'),
+            'is_inertia' => $request->header('X-Inertia'),
+        ]);
+
         $this->authorize('update', $organization);
 
         try {
+            Log::info('Starting validation', [
+                'request_data' => $request->except(['logo']),
+                'has_logo_file' => $request->hasFile('logo'),
+            ]);
+
             $validated = $request->validate([
                 'name' => ['required', 'string', 'max:255'],
                 'slug' => ['required', 'string', 'max:60', 'alpha_dash', Rule::unique('organizations')->ignore($organization->id)],
@@ -134,15 +148,25 @@ class OrganizationController extends Controller
                 'is_active' => ['boolean'],
             ]);
 
+            Log::info('Validation passed', ['validated_keys' => array_keys($validated)]);
+
             // Handle logo upload
             // Only process logo if it's actually a file upload
             if ($request->hasFile('logo')) {
+                Log::info('Processing logo upload', [
+                    'file_name' => $request->file('logo')->getClientOriginalName(),
+                    'file_size' => $request->file('logo')->getSize(),
+                ]);
+
                 // Delete old logo if exists
                 if ($organization->logo) {
                     Storage::disk('public')->delete($organization->logo);
+                    Log::info('Deleted old logo', ['old_logo' => $organization->logo]);
                 }
                 $validated['logo'] = $request->file('logo')->store('logos', 'public');
+                Log::info('Logo stored', ['new_logo_path' => $validated['logo']]);
             } else {
+                Log::info('No logo file in request');
                 // Remove logo from validated data if no file was uploaded
                 // This ensures we don't accidentally set logo to null
                 if (isset($validated['logo'])) {
@@ -150,17 +174,25 @@ class OrganizationController extends Controller
                 }
             }
 
+            Log::info('Updating organization', ['data_to_update' => array_keys($validated)]);
             $organization->update($validated);
+            Log::info('Organization updated successfully');
 
             return back()->with('success', '¡Cambios guardados!');
         } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation failed', [
+                'errors' => $e->errors(),
+                'organization_id' => $organization->id,
+            ]);
             // Return validation errors properly for Inertia
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
-            Log::error('Error updating organization: ' . $e->getMessage(), [
+            Log::error('Error updating organization', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'organization_id' => $organization->id,
-                'user_id' => $request->user()->id,
-                'exception' => $e,
+                'user_id' => $request->user()?->id,
+                'exception' => get_class($e),
             ]);
 
             return back()->with('error', 'Error al guardar los cambios. Por favor, intenta de nuevo.');

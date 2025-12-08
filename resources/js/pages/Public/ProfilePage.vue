@@ -159,6 +159,7 @@ interface Organization {
     name: string;
     slug: string;
     logo?: string;
+    logo_url?: string;
     type: string;
     description?: string;
 }
@@ -476,7 +477,7 @@ onMounted(() => {
         <meta name="description" :content="profile.bio || profile.slogan || organization.description" />
         <meta property="og:title" :content="`${profile.name} | ${organization.name}`" />
         <meta property="og:description" :content="profile.slogan || profile.bio" />
-        <meta property="og:image" :content="profile.photo || organization.logo" />
+        <meta property="og:image" :content="profile.photo || organization.logo_url" />
     </Head>
 
     <!-- Main Container -->
@@ -515,10 +516,10 @@ onMounted(() => {
                 style="transition: all 0.6s ease-out"
             >
                 <!-- Photo -->
-                <div v-if="settings.show_profile_photo && (profile.photo || organization.logo)" class="flex justify-center mb-4">
+                <div v-if="settings.show_profile_photo && (profile.photo || organization.logo_url)" class="flex justify-center mb-4">
                     <div :class="photoClasses" :style="{ borderColor: settings.primary_color }">
                         <img
-                            :src="profile.photo || organization.logo"
+                            :src="profile.photo || organization.logo_url"
                             :alt="profile.name"
                             class="w-full h-full object-cover"
                         />

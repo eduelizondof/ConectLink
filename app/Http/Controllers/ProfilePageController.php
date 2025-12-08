@@ -46,7 +46,14 @@ class ProfilePageController extends Controller
             ->get();
 
         return Inertia::render('Public/ProfilePage', [
-            'organization' => $organization->only(['id', 'name', 'slug', 'logo', 'type', 'description']),
+            'organization' => [
+                'id' => $organization->id,
+                'name' => $organization->name,
+                'slug' => $organization->slug,
+                'logo' => $organization->logo_url,
+                'type' => $organization->type,
+                'description' => $organization->description,
+            ],
             'profile' => $this->formatProfile($profile),
             'products' => $products,
             'categories' => $categories,
@@ -88,7 +95,14 @@ class ProfilePageController extends Controller
             ->get();
 
         return Inertia::render('Public/ProfilePage', [
-            'organization' => $organization->only(['id', 'name', 'slug', 'logo', 'type', 'description']),
+            'organization' => [
+                'id' => $organization->id,
+                'name' => $organization->name,
+                'slug' => $organization->slug,
+                'logo' => $organization->logo_url,
+                'type' => $organization->type,
+                'description' => $organization->description,
+            ],
             'profile' => $this->formatProfile($profile),
             'products' => $products,
             'categories' => $categories,

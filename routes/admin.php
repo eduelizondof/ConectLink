@@ -35,7 +35,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::get('/organizations/create', [OrganizationController::class, 'create'])->name('organizations.create');
     Route::post('/organizations', [OrganizationController::class, 'store'])->name('organizations.store');
     Route::get('/organizations/{organization}/edit', [OrganizationController::class, 'edit'])->name('organizations.edit');
-    Route::put('/organizations/{organization}', [OrganizationController::class, 'update'])->name('organizations.update');
+    Route::match(['put', 'post'], '/organizations/{organization}', [OrganizationController::class, 'update'])->name('organizations.update');
     Route::delete('/organizations/{organization}', [OrganizationController::class, 'destroy'])->name('organizations.destroy');
     Route::post('/organizations/suggest-slug', [OrganizationController::class, 'suggestSlug'])->name('organizations.suggest-slug');
 
