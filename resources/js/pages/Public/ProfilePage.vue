@@ -34,6 +34,7 @@ import {
     CheckCircle,
     Megaphone,
 } from 'lucide-vue-next';
+import { GlowingBorder, ProfileParticles } from '@/components/effects';
 
 // Props from controller
 interface SocialLink {
@@ -82,6 +83,8 @@ interface ProfileSettings {
     background_gradient_direction: string;
     background_image?: string;
     background_overlay_opacity: number;
+    background_pattern?: string;
+    background_pattern_opacity?: number;
     primary_color: string;
     secondary_color: string;
     text_color: string;
@@ -91,11 +94,18 @@ interface ProfileSettings {
     card_border_radius: string;
     card_shadow: boolean;
     card_border_color?: string;
+    card_glow_enabled?: boolean;
+    card_glow_color?: string;
+    card_glow_color_secondary?: string;
+    card_glow_variant?: 'default' | 'cyan' | 'purple' | 'rainbow' | 'primary';
     font_family: string;
     font_size: string;
     animation_entrance: string;
     animation_hover: string;
     animation_delay: number;
+    show_particles?: boolean;
+    particles_style?: string;
+    particles_color?: string;
     layout_style: string;
     show_profile_photo: boolean;
     photo_style: string;
@@ -168,6 +178,7 @@ const selectedCategory = ref<number | null>(null);
 const showProductModal = ref(false);
 const selectedProduct = ref<Product | null>(null);
 const showShareMenu = ref(false);
+const currentUrl = ref('');
 
 // Computed
 const settings = computed(() => props.profile.settings || getDefaultSettings());
@@ -272,6 +283,8 @@ function getDefaultSettings(): ProfileSettings {
         background_color: '#ffffff',
         background_gradient_direction: 'to-b',
         background_overlay_opacity: 0,
+        background_pattern: 'none',
+        background_pattern_opacity: 10,
         primary_color: '#3b82f6',
         secondary_color: '#8b5cf6',
         text_color: '#1f2937',
@@ -280,11 +293,15 @@ function getDefaultSettings(): ProfileSettings {
         card_background_color: '#ffffff',
         card_border_radius: 'lg',
         card_shadow: true,
+        card_glow_enabled: false,
+        card_glow_variant: 'primary',
         font_family: 'Inter',
         font_size: 'base',
         animation_entrance: 'fade',
         animation_hover: 'lift',
         animation_delay: 100,
+        show_particles: false,
+        particles_style: 'dots',
         layout_style: 'centered',
         show_profile_photo: true,
         photo_style: 'circle',
@@ -294,6 +311,28 @@ function getDefaultSettings(): ProfileSettings {
         social_colored: true,
     };
 }
+
+// Computed for glow settings
+const glowSettings = computed(() => ({
+    enabled: settings.value.card_glow_enabled || false,
+    color: settings.value.card_glow_color || settings.value.primary_color,
+    colorSecondary: settings.value.card_glow_color_secondary || settings.value.secondary_color,
+    variant: settings.value.card_glow_variant || 'primary',
+    borderRadius: cardBorderRadiusValue.value,
+}));
+
+const cardBorderRadiusValue = computed(() => {
+    const radiusMap: Record<string, string> = {
+        none: '0',
+        sm: '0.25rem',
+        md: '0.375rem',
+        lg: '0.5rem',
+        xl: '0.75rem',
+        '2xl': '1rem',
+        full: '1.5rem',
+    };
+    return radiusMap[settings.value.card_border_radius] || '0.5rem';
+});
 
 function getGradientDirection(direction: string): string {
     const map: Record<string, string> = {
@@ -393,7 +432,7 @@ async function downloadVcard() {
 }
 
 async function shareProfile() {
-    const url = window.location.href;
+    const url = currentUrl.value;
     const title = `${props.profile.name} - ${props.organization.name}`;
 
     if (navigator.share) {
@@ -408,12 +447,15 @@ async function shareProfile() {
 }
 
 function copyToClipboard() {
-    navigator.clipboard.writeText(window.location.href);
+    navigator.clipboard.writeText(currentUrl.value);
     showShareMenu.value = false;
 }
 
 // Lifecycle
 onMounted(() => {
+    // Store current URL for template access
+    currentUrl.value = window.location.href;
+
     setTimeout(() => {
         isLoaded.value = true;
     }, 100);
@@ -439,11 +481,29 @@ onMounted(() => {
 
     <!-- Main Container -->
     <div class="min-h-screen" :style="backgroundStyle">
+        <!-- Background Pattern Overlay -->
+        <div
+            v-if="settings.background_pattern && settings.background_pattern !== 'none'"
+            class="fixed inset-0 pointer-events-none z-0"
+            :class="[`bg-pattern-${settings.background_pattern}`]"
+            :style="{ opacity: (settings.background_pattern_opacity || 10) / 100 }"
+        />
+
         <!-- Background Overlay (for images) -->
         <div
             v-if="settings.background_type === 'image' && settings.background_overlay_opacity > 0"
             class="fixed inset-0 bg-black pointer-events-none"
             :style="{ opacity: settings.background_overlay_opacity / 100 }"
+        />
+
+        <!-- Particles Effect -->
+        <ProfileParticles
+            v-if="settings.show_particles"
+            :style="settings.particles_style as any"
+            :color="settings.particles_color"
+            :primary-color="settings.primary_color"
+            :secondary-color="settings.secondary_color"
+            :particle-count="40"
         />
 
         <!-- Content -->
@@ -562,45 +622,55 @@ onMounted(() => {
                 :class="{ 'opacity-0 translate-y-8': !isLoaded, 'opacity-100 translate-y-0': isLoaded }"
                 style="transition: all 0.6s ease-out 0.2s"
             >
-                <a
+                <component
+                    :is="glowSettings.enabled ? GlowingBorder : 'div'"
                     v-for="(link, index) in profile.custom_links"
                     :key="link.id"
-                    :href="link.url"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="block w-full p-4 text-center transition-all duration-300"
-                    :class="[
-                        cardClasses,
-                        settings.animation_hover === 'lift' ? 'hover:-translate-y-1' : '',
-                        settings.animation_hover === 'glow' ? 'hover:shadow-2xl' : '',
-                        settings.animation_hover === 'pulse' ? 'hover:animate-pulse' : '',
-                        link.is_highlighted ? 'ring-2' : '',
-                    ]"
-                    :style="{
-                        ...cardStyle,
-                        backgroundColor: link.button_color || cardStyle.backgroundColor,
-                        color: link.text_color || settings.text_color,
-                        '--tw-ring-color': settings.primary_color,
-                        animationDelay: `${index * settings.animation_delay}ms`,
-                    }"
-                    @click="trackClick(link.id)"
+                    :color="glowSettings.color"
+                    :color-secondary="glowSettings.colorSecondary"
+                    :variant="glowSettings.variant"
+                    :border-radius="glowSettings.borderRadius"
+                    :border-width="2"
+                    :duration="3"
+                    :style="{ animationDelay: `${index * settings.animation_delay}ms` }"
                 >
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3 text-left flex-1">
-                            <div
-                                v-if="link.thumbnail"
-                                class="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0"
-                            >
-                                <img :src="link.thumbnail" :alt="link.title" class="w-full h-full object-cover" />
+                    <a
+                        :href="link.url"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="block w-full p-4 text-center transition-all duration-300"
+                        :class="[
+                            cardClasses,
+                            settings.animation_hover === 'lift' ? 'hover:-translate-y-1' : '',
+                            settings.animation_hover === 'glow' && !glowSettings.enabled ? 'hover:shadow-2xl' : '',
+                            settings.animation_hover === 'pulse' ? 'hover:animate-pulse' : '',
+                            link.is_highlighted && !glowSettings.enabled ? 'ring-2' : '',
+                        ]"
+                        :style="{
+                            ...cardStyle,
+                            backgroundColor: link.button_color || cardStyle.backgroundColor,
+                            color: link.text_color || settings.text_color,
+                            '--tw-ring-color': settings.primary_color,
+                        }"
+                        @click="trackClick(link.id)"
+                    >
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3 text-left flex-1">
+                                <div
+                                    v-if="link.thumbnail"
+                                    class="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0"
+                                >
+                                    <img :src="link.thumbnail" :alt="link.title" class="w-full h-full object-cover" />
+                                </div>
+                                <div>
+                                    <p class="font-semibold">{{ link.title }}</p>
+                                    <p v-if="link.description" class="text-sm opacity-70">{{ link.description }}</p>
+                                </div>
                             </div>
-                            <div>
-                                <p class="font-semibold">{{ link.title }}</p>
-                                <p v-if="link.description" class="text-sm opacity-70">{{ link.description }}</p>
-                            </div>
+                            <ChevronRight class="w-5 h-5 opacity-50" />
                         </div>
-                        <ChevronRight class="w-5 h-5 opacity-50" />
-                    </div>
-                </a>
+                    </a>
+                </component>
             </div>
 
             <!-- Products Catalog -->
@@ -649,67 +719,77 @@ onMounted(() => {
 
                 <!-- Products Grid -->
                 <div class="grid grid-cols-2 gap-3">
-                    <button
+                    <component
+                        :is="glowSettings.enabled ? GlowingBorder : 'div'"
                         v-for="product in filteredProducts"
                         :key="product.id"
-                        class="text-left transition-all duration-300"
-                        :class="[
-                            cardClasses,
-                            settings.animation_hover === 'lift' ? 'hover:-translate-y-1' : '',
-                        ]"
-                        :style="cardStyle"
-                        @click="openProductModal(product)"
+                        :color="glowSettings.color"
+                        :color-secondary="glowSettings.colorSecondary"
+                        :variant="glowSettings.variant"
+                        :border-radius="glowSettings.borderRadius"
+                        :border-width="2"
+                        :duration="3"
                     >
-                        <!-- Product Image -->
-                        <div class="aspect-square rounded-t-lg overflow-hidden bg-gray-100 relative">
-                            <img
-                                v-if="product.image"
-                                :src="product.image"
-                                :alt="product.name"
-                                class="w-full h-full object-cover"
-                            />
-                            <div v-else class="w-full h-full flex items-center justify-center">
-                                <Package class="w-12 h-12 text-gray-300" />
-                            </div>
-                            <!-- Featured Badge -->
-                            <div
-                                v-if="product.is_featured"
-                                class="absolute top-2 left-2 px-2 py-0.5 text-xs font-semibold rounded-full"
-                                :style="{ backgroundColor: settings.secondary_color, color: '#ffffff' }"
-                            >
-                                <Star class="w-3 h-3 inline mr-1" />
-                                Destacado
-                            </div>
-                            <!-- Sale Badge -->
-                            <div
-                                v-if="product.sale_price && product.sale_price < (product.price || 0)"
-                                class="absolute top-2 right-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-red-500 text-white"
-                            >
-                                Oferta
-                            </div>
-                        </div>
-                        <!-- Product Info -->
-                        <div class="p-3">
-                            <h3 class="font-semibold text-sm line-clamp-2 mb-1" :style="{ color: settings.text_color }">
-                                {{ product.name }}
-                            </h3>
-                            <div v-if="product.price" class="flex items-center gap-2">
-                                <span
-                                    v-if="product.sale_price && product.sale_price < product.price"
-                                    class="text-sm font-bold"
-                                    :style="{ color: settings.primary_color }"
+                        <button
+                            class="text-left transition-all duration-300 w-full"
+                            :class="[
+                                cardClasses,
+                                settings.animation_hover === 'lift' ? 'hover:-translate-y-1' : '',
+                            ]"
+                            :style="cardStyle"
+                            @click="openProductModal(product)"
+                        >
+                            <!-- Product Image -->
+                            <div class="aspect-square rounded-t-lg overflow-hidden bg-gray-100 relative">
+                                <img
+                                    v-if="product.image"
+                                    :src="product.image"
+                                    :alt="product.name"
+                                    class="w-full h-full object-cover"
+                                />
+                                <div v-else class="w-full h-full flex items-center justify-center">
+                                    <Package class="w-12 h-12 text-gray-300" />
+                                </div>
+                                <!-- Featured Badge -->
+                                <div
+                                    v-if="product.is_featured"
+                                    class="absolute top-2 left-2 px-2 py-0.5 text-xs font-semibold rounded-full"
+                                    :style="{ backgroundColor: settings.secondary_color, color: '#ffffff' }"
                                 >
-                                    {{ formatPrice(product.sale_price, product.currency) }}
-                                </span>
-                                <span
-                                    :class="product.sale_price && product.sale_price < product.price ? 'line-through text-xs opacity-50' : 'text-sm font-bold'"
-                                    :style="{ color: product.sale_price && product.sale_price < product.price ? settings.text_secondary_color : settings.primary_color }"
+                                    <Star class="w-3 h-3 inline mr-1" />
+                                    Destacado
+                                </div>
+                                <!-- Sale Badge -->
+                                <div
+                                    v-if="product.sale_price && product.sale_price < (product.price || 0)"
+                                    class="absolute top-2 right-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-red-500 text-white"
                                 >
-                                    {{ formatPrice(product.price, product.currency) }}
-                                </span>
+                                    Oferta
+                                </div>
                             </div>
-                        </div>
-                    </button>
+                            <!-- Product Info -->
+                            <div class="p-3">
+                                <h3 class="font-semibold text-sm line-clamp-2 mb-1" :style="{ color: settings.text_color }">
+                                    {{ product.name }}
+                                </h3>
+                                <div v-if="product.price" class="flex items-center gap-2">
+                                    <span
+                                        v-if="product.sale_price && product.sale_price < product.price"
+                                        class="text-sm font-bold"
+                                        :style="{ color: settings.primary_color }"
+                                    >
+                                        {{ formatPrice(product.sale_price, product.currency) }}
+                                    </span>
+                                    <span
+                                        :class="product.sale_price && product.sale_price < product.price ? 'line-through text-xs opacity-50' : 'text-sm font-bold'"
+                                        :style="{ color: product.sale_price && product.sale_price < product.price ? settings.text_secondary_color : settings.primary_color }"
+                                    >
+                                        {{ formatPrice(product.price, product.currency) }}
+                                    </span>
+                                </div>
+                            </div>
+                        </button>
+                    </component>
                 </div>
             </div>
 
@@ -937,7 +1017,7 @@ onMounted(() => {
                             <span class="font-medium text-gray-700">Copiar enlace</span>
                         </button>
                         <a
-                            :href="`https://wa.me/?text=${encodeURIComponent(`Mira el perfil de ${profile.name}: ${window.location.href}`)}`"
+                            :href="`https://wa.me/?text=${encodeURIComponent(`Mira el perfil de ${profile.name}: ${currentUrl}`)}`"
                             target="_blank"
                             class="flex items-center gap-3 w-full p-3 rounded-xl bg-green-50 hover:bg-green-100 transition-colors"
                         >
@@ -1005,6 +1085,29 @@ onMounted(() => {
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+}
+
+/* Background Patterns */
+.bg-pattern-dots {
+    background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.bg-pattern-grid {
+    background-image: 
+        linear-gradient(to right, currentColor 1px, transparent 1px),
+        linear-gradient(to bottom, currentColor 1px, transparent 1px);
+    background-size: 30px 30px;
+}
+
+.bg-pattern-waves {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='currentColor' fill-opacity='1' d='M0,160L48,176C96,192,192,224,288,213.3C384,203,480,149,576,144C672,139,768,181,864,197.3C960,213,1056,203,1152,181.3C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+    background-size: cover;
+    background-position: bottom;
+}
+
+.bg-pattern-noise {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 }
 </style>
 

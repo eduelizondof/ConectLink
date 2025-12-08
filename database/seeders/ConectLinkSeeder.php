@@ -148,7 +148,7 @@ class ConectLinkSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        // Primary profile settings - Vibrant fruit theme
+        // Primary profile settings - Vibrant fruit theme with visual effects
         ProfileSetting::create([
             'profile_id' => $primaryProfile->id,
             'background_type' => 'gradient',
@@ -156,6 +156,8 @@ class ConectLinkSeeder extends Seeder
             'background_gradient_start' => '#fef3c7',
             'background_gradient_end' => '#dcfce7',
             'background_gradient_direction' => 'to-br',
+            'background_pattern' => 'none',
+            'background_pattern_opacity' => 5,
             'primary_color' => '#16a34a',
             'secondary_color' => '#ea580c',
             'text_color' => '#1f2937',
@@ -164,10 +166,14 @@ class ConectLinkSeeder extends Seeder
             'card_background_color' => 'rgba(255, 255, 255, 0.85)',
             'card_border_radius' => 'xl',
             'card_shadow' => true,
+            'card_glow_enabled' => true, // Enable glowing border effect
+            'card_glow_variant' => 'primary',
             'font_family' => 'Poppins',
             'animation_entrance' => 'slide-up',
             'animation_hover' => 'lift',
             'animation_delay' => 80,
+            'show_particles' => true, // Enable particles
+            'particles_style' => 'dots',
             'layout_style' => 'centered',
             'show_profile_photo' => true,
             'photo_style' => 'rounded',
@@ -405,13 +411,15 @@ class ConectLinkSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        // CEO profile settings - Executive dark theme
+        // CEO profile settings - Executive dark theme with rainbow glow
         ProfileSetting::create([
             'profile_id' => $ceoProfile->id,
             'background_type' => 'gradient',
             'background_gradient_start' => '#1e293b',
             'background_gradient_end' => '#0f172a',
             'background_gradient_direction' => 'to-b',
+            'background_pattern' => 'dots',
+            'background_pattern_opacity' => 5,
             'primary_color' => '#f59e0b',
             'secondary_color' => '#f97316',
             'text_color' => '#f8fafc',
@@ -421,10 +429,14 @@ class ConectLinkSeeder extends Seeder
             'card_border_radius' => 'xl',
             'card_shadow' => true,
             'card_border_color' => 'rgba(248, 250, 252, 0.1)',
+            'card_glow_enabled' => true, // Enable glowing border
+            'card_glow_variant' => 'rainbow', // Rainbow glow for premium look
             'font_family' => 'Playfair Display',
             'animation_entrance' => 'scale',
             'animation_hover' => 'glow',
             'animation_delay' => 120,
+            'show_particles' => true,
+            'particles_style' => 'lines', // Lines style for professional look
             'layout_style' => 'centered',
             'show_profile_photo' => true,
             'photo_style' => 'circle',

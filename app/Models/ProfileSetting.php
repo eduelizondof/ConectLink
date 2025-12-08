@@ -20,6 +20,8 @@ class ProfileSetting extends Model
         'background_gradient_direction',
         'background_image',
         'background_overlay_opacity',
+        'background_pattern',
+        'background_pattern_opacity',
         // Theme colors
         'primary_color',
         'secondary_color',
@@ -31,6 +33,10 @@ class ProfileSetting extends Model
         'card_border_radius',
         'card_shadow',
         'card_border_color',
+        'card_glow_enabled',
+        'card_glow_color',
+        'card_glow_color_secondary',
+        'card_glow_variant',
         // Typography
         'font_family',
         'font_size',
@@ -38,6 +44,10 @@ class ProfileSetting extends Model
         'animation_entrance',
         'animation_hover',
         'animation_delay',
+        // Visual effects
+        'show_particles',
+        'particles_style',
+        'particles_color',
         // Layout
         'layout_style',
         'show_profile_photo',
@@ -53,10 +63,13 @@ class ProfileSetting extends Model
     {
         return [
             'background_overlay_opacity' => 'integer',
+            'background_pattern_opacity' => 'integer',
             'card_shadow' => 'boolean',
+            'card_glow_enabled' => 'boolean',
             'animation_delay' => 'integer',
             'show_profile_photo' => 'boolean',
             'social_colored' => 'boolean',
+            'show_particles' => 'boolean',
         ];
     }
 
@@ -121,6 +134,8 @@ class ProfileSetting extends Model
         return [
             'background_type' => 'solid',
             'background_color' => '#ffffff',
+            'background_pattern' => 'none',
+            'background_pattern_opacity' => 10,
             'primary_color' => '#3b82f6',
             'secondary_color' => '#8b5cf6',
             'text_color' => '#1f2937',
@@ -129,11 +144,15 @@ class ProfileSetting extends Model
             'card_background_color' => '#ffffff',
             'card_border_radius' => 'lg',
             'card_shadow' => true,
+            'card_glow_enabled' => false,
+            'card_glow_variant' => 'primary',
             'font_family' => 'Inter',
             'font_size' => 'base',
             'animation_entrance' => 'fade',
             'animation_hover' => 'lift',
             'animation_delay' => 100,
+            'show_particles' => false,
+            'particles_style' => 'dots',
             'layout_style' => 'centered',
             'show_profile_photo' => true,
             'photo_style' => 'circle',
