@@ -32,7 +32,7 @@ const showAddModal = ref(false);
 const showCategoryModal = ref(false);
 const isUnmounting = ref(false);
 
-const canAddMore = computed(() => props.organization.products.length < props.limits.max_products);
+const canAddMore = computed(() => (props.organization.products?.length ?? 0) < props.limits.max_products);
 
 // Close modals before unmounting to prevent Vue DOM errors
 onBeforeUnmount(async () => {
@@ -142,7 +142,7 @@ function formatPrice(price: number, currency: string) {
             <div>
                 <h2 class="text-lg font-semibold">Catálogo de Productos</h2>
                 <p class="text-sm text-muted-foreground">
-                    {{ organization.products.length }}/{{ limits.max_products }} productos
+                    {{ organization.products?.length ?? 0 }}/{{ limits.max_products }} productos
                 </p>
             </div>
             <div class="flex gap-2">
@@ -158,7 +158,7 @@ function formatPrice(price: number, currency: string) {
         </div>
 
         <!-- Categories -->
-        <div v-if="organization.productCategories.length" class="flex flex-wrap gap-2">
+        <div v-if="organization.productCategories?.length" class="flex flex-wrap gap-2">
             <div
                 v-for="cat in organization.productCategories"
                 :key="cat.id"
@@ -172,7 +172,7 @@ function formatPrice(price: number, currency: string) {
         </div>
 
         <!-- Products Grid -->
-        <div v-if="organization.products.length" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div v-if="organization.products?.length" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             <div
                 v-for="product in organization.products"
                 :key="product.id"
