@@ -287,7 +287,7 @@ const navLinks = [
                     <div 
                         class="relative mx-auto overflow-visible"
                         :class="{ 'scale-in': isLoaded }"
-                        style="animation-delay: 0.5s; min-height: 360px; padding: 20px 0;"
+                        style="animation-delay: 0.5s; min-height: 400px; padding: 30px 0;"
                     >
                         <Globe3D :size="300" class="mx-auto" />
                         

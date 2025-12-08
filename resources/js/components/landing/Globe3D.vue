@@ -34,15 +34,19 @@ const createGlobe = () => {
     camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
     camera.position.z = 2.5;
 
-    // Renderer setup
+    // Renderer setup - Increase size to accommodate outer ring (1.17 radius)
+    const canvasSize = Math.ceil(props.size * 1.2); // 20% extra for ring
     renderer = new THREE.WebGLRenderer({ 
         alpha: true, 
         antialias: true,
         powerPreference: 'high-performance'
     });
-    renderer.setSize(props.size, props.size);
+    renderer.setSize(canvasSize, canvasSize);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    containerRef.value.appendChild(renderer.domElement);
+    const canvas = renderer.domElement;
+    canvas.style.display = 'block';
+    canvas.style.margin = '0 auto';
+    containerRef.value.appendChild(canvas);
 
     // Globe geometry with wireframe
     const globeGeometry = new THREE.SphereGeometry(1, 48, 48);
@@ -194,10 +198,11 @@ const createGlobe = () => {
 const handleResize = () => {
     if (!containerRef.value || !renderer) return;
     
-    const size = Math.min(containerRef.value.offsetWidth, props.size);
+    const baseSize = Math.min(containerRef.value.offsetWidth, props.size);
+    const canvasSize = Math.ceil(baseSize * 1.2); // 20% extra for ring
     camera.aspect = 1;
     camera.updateProjectionMatrix();
-    renderer.setSize(size, size);
+    renderer.setSize(canvasSize, canvasSize);
 };
 
 onMounted(() => {
@@ -224,7 +229,7 @@ watch(() => props.size, () => {
     <div 
         ref="containerRef" 
         class="globe-container relative flex items-center justify-center overflow-visible"
-        :style="{ width: `${size}px`, height: `${size}px`, minHeight: `${size}px` }"
+        :style="{ width: `${Math.ceil(size * 1.2)}px`, height: `${Math.ceil(size * 1.2)}px`, minHeight: `${Math.ceil(size * 1.2)}px` }"
     >
         <!-- Glow effect behind globe -->
         <div 
@@ -241,6 +246,10 @@ watch(() => props.size, () => {
 
 .globe-container canvas {
     cursor: grab;
+    display: block;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
 }
 
 .globe-container canvas:active {
