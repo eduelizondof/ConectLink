@@ -302,7 +302,7 @@ function handleLogoFile(event: Event) {
                                     <div class="space-y-2">
                                         <Label>Rotación: {{ form.gradient_rotation }}°</Label>
                                         <Slider
-                                            v-model="[form.gradient_rotation]"
+                                            :model-value="[form.gradient_rotation]"
                                             @update:model-value="form.gradient_rotation = $event[0]"
                                             :min="0"
                                             :max="360"
@@ -431,7 +431,7 @@ function handleLogoFile(event: Event) {
                                     <div class="space-y-2">
                                         <Label>Tamaño: {{ form.logo_size }}%</Label>
                                         <Slider
-                                            v-model="[form.logo_size]"
+                                            :model-value="[form.logo_size]"
                                             @update:model-value="form.logo_size = $event[0]"
                                             :min="10"
                                             :max="40"
@@ -459,7 +459,7 @@ function handleLogoFile(event: Event) {
                                 <div class="space-y-2">
                                     <Label>Margen: {{ form.logo_margin }}px</Label>
                                     <Slider
-                                        v-model="[form.logo_margin]"
+                                        :model-value="[form.logo_margin]"
                                         @update:model-value="form.logo_margin = $event[0]"
                                         :min="0"
                                         :max="20"
@@ -500,7 +500,7 @@ function handleLogoFile(event: Event) {
                                 <div class="space-y-2">
                                     <Label>Tamaño: {{ form.size }}px</Label>
                                     <Slider
-                                        v-model="[form.size]"
+                                        :model-value="[form.size]"
                                         @update:model-value="form.size = $event[0]"
                                         :min="100"
                                         :max="500"
