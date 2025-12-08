@@ -167,7 +167,7 @@ class ProfilePageController extends Controller
             'id' => $profile->id,
             'name' => $profile->name,
             'slug' => $profile->slug,
-            'photo' => $profile->photo,
+            'photo' => $profile->photo_url,
             'job_title' => $profile->job_title,
             'slogan' => $profile->slogan,
             'bio' => $profile->bio,

@@ -27,6 +27,10 @@ class Profile extends Model
         'views_count',
     ];
 
+    protected $appends = [
+        'photo_url',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -182,6 +186,18 @@ class Profile extends Model
     public function incrementViews(): void
     {
         $this->increment('views_count');
+    }
+
+    /**
+     * Get the full URL for the profile's photo.
+     */
+    public function getPhotoUrlAttribute(): ?string
+    {
+        if (!$this->photo) {
+            return null;
+        }
+
+        return asset('storage/' . $this->photo);
     }
 }
 

@@ -51,33 +51,77 @@ class ProfileController extends Controller
 
     public function update(Request $request, Profile $profile)
     {
-        $this->authorize('update', $profile->organization);
-
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'slug' => ['nullable', 'string', 'max:60', 'alpha_dash', Rule::unique('profiles')->where('organization_id', $profile->organization_id)->ignore($profile->id)],
-            'job_title' => ['nullable', 'string', 'max:100'],
-            'slogan' => ['nullable', 'string', 'max:255'],
-            'bio' => ['nullable', 'string', 'max:1000'],
-            'photo' => ['nullable', 'image', 'max:2048'],
-            'is_active' => ['boolean'],
+        \Log::info('Profile update request started', [
+            'profile_id' => $profile->id,
+            'user_id' => $request->user()?->id,
+            'has_file' => $request->hasFile('photo'),
+            'method' => $request->method(),
+            'content_type' => $request->header('Content-Type'),
         ]);
 
-        if ($request->hasFile('photo')) {
-            if ($profile->photo) {
-                \Storage::disk('public')->delete($profile->photo);
+        $this->authorize('update', $profile->organization);
+
+        try {
+            $validated = $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'slug' => ['nullable', 'string', 'max:60', 'alpha_dash', Rule::unique('profiles')->where('organization_id', $profile->organization_id)->ignore($profile->id)],
+                'job_title' => ['nullable', 'string', 'max:100'],
+                'slogan' => ['nullable', 'string', 'max:255'],
+                'bio' => ['nullable', 'string', 'max:1000'],
+                'photo' => ['nullable', 'image', 'max:2048'],
+                'is_active' => ['boolean'],
+            ]);
+
+            \Log::info('Validation passed', ['validated_keys' => array_keys($validated)]);
+
+            // Handle photo upload
+            if ($request->hasFile('photo')) {
+                \Log::info('Processing photo upload', [
+                    'file_name' => $request->file('photo')->getClientOriginalName(),
+                    'file_size' => $request->file('photo')->getSize(),
+                ]);
+
+                if ($profile->photo) {
+                    \Storage::disk('public')->delete($profile->photo);
+                    \Log::info('Deleted old photo', ['old_photo' => $profile->photo]);
+                }
+                $validated['photo'] = $request->file('photo')->store('profiles', 'public');
+                \Log::info('Photo stored', ['new_photo_path' => $validated['photo']]);
+            } else {
+                \Log::info('No photo file in request');
+                // Remove photo from validated data if no file was uploaded
+                if (isset($validated['photo'])) {
+                    unset($validated['photo']);
+                }
             }
-            $validated['photo'] = $request->file('photo')->store('profiles', 'public');
+
+            // Primary profiles don't have slug
+            if ($profile->is_primary) {
+                unset($validated['slug']);
+            }
+
+            \Log::info('Updating profile', ['data_to_update' => array_keys($validated)]);
+            $profile->update($validated);
+            \Log::info('Profile updated successfully');
+
+            return back()->with('success', '¡Perfil actualizado!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Validation failed', [
+                'errors' => $e->errors(),
+                'profile_id' => $profile->id,
+            ]);
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            \Log::error('Error updating profile', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'profile_id' => $profile->id,
+                'user_id' => $request->user()?->id,
+                'exception' => get_class($e),
+            ]);
+
+            return back()->with('error', 'Error al guardar los cambios. Por favor, intenta de nuevo.');
         }
-
-        // Primary profiles don't have slug
-        if ($profile->is_primary) {
-            unset($validated['slug']);
-        }
-
-        $profile->update($validated);
-
-        return back()->with('success', '¡Perfil actualizado!');
     }
 
     public function updateSettings(Request $request, Profile $profile)

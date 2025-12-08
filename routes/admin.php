@@ -41,7 +41,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
 
     // Profiles (within organization)
     Route::post('/organizations/{organization}/profiles', [ProfileController::class, 'store'])->name('profiles.store');
-    Route::put('/profiles/{profile}', [ProfileController::class, 'update'])->name('profiles.update');
+    Route::match(['put', 'post'], '/profiles/{profile}', [ProfileController::class, 'update'])->name('profiles.update');
     Route::put('/profiles/{profile}/settings', [ProfileController::class, 'updateSettings'])->name('profiles.settings');
     Route::delete('/profiles/{profile}', [ProfileController::class, 'destroy'])->name('profiles.destroy');
 

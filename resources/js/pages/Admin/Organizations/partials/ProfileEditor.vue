@@ -102,14 +102,35 @@ function submitCreate() {
 function submitEdit() {
     if (!editingProfile.value) return;
 
-    editForm.put(`/admin/profiles/${editingProfile.value.id}`, {
-        forceFormData: true,
-        preserveScroll: true,
-        onSuccess: () => {
-            closeEditModal();
-            swal.success('¡Perfil actualizado!');
-        },
-    });
+    // If photo is a File, use POST with _method spoofing
+    // Otherwise, use PUT normally
+    if (editForm.photo instanceof File) {
+        editForm
+            .transform((data) => ({
+                ...data,
+                _method: 'PUT',
+            }))
+            .post(`/admin/profiles/${editingProfile.value.id}`, {
+                forceFormData: true,
+                preserveScroll: true,
+                onSuccess: () => {
+                    closeEditModal();
+                    swal.success('¡Perfil actualizado!');
+                },
+            });
+    } else {
+        editForm.transform((data) => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { photo, ...rest } = data;
+            return rest;
+        }).put(`/admin/profiles/${editingProfile.value.id}`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                closeEditModal();
+                swal.success('¡Perfil actualizado!');
+            },
+        });
+    }
 }
 
 async function deleteProfile(profile: any) {
@@ -168,8 +189,8 @@ async function deleteProfile(profile: any) {
                     <!-- Avatar -->
                     <div class="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-muted">
                         <img
-                            v-if="profile.photo"
-                            :src="`/storage/${profile.photo}`"
+                            v-if="profile.photo_url"
+                            :src="profile.photo_url"
                             :alt="profile.name"
                             class="h-full w-full object-cover"
                         />
@@ -304,7 +325,7 @@ async function deleteProfile(profile: any) {
                 <form v-if="editingProfile" @submit.prevent="submitEdit" class="space-y-4">
                     <ImageUpload
                         v-model="editForm.photo"
-                        :current-image="editingProfile.photo"
+                        :current-image="editingProfile.photo_url"
                         label="Foto"
                         aspect-ratio="square"
                         :max-size="2"
