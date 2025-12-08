@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, watch, onBeforeUnmount } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { useSwal } from '@/composables/useSwal';
 import {
@@ -8,7 +8,6 @@ import {
     Save,
     Palette,
     Square,
-    Circle,
     Image,
     RefreshCw,
     CreditCard,
@@ -101,8 +100,26 @@ const defaultSettings: QrSettings = {
 // Form with settings
 const form = useForm<QrSettings & { custom_logo_file: File | null }>({
     ...defaultSettings,
-    ...props.profile.qr_settings,
+    ...(props.profile.qr_settings || {}),
     custom_logo_file: null,
+    // Ensure logo_source has a default value
+    logo_source: props.profile.qr_settings?.logo_source || defaultSettings.logo_source || 'organization',
+});
+
+// Reactive ref for show_logo to ensure reactivity
+const showLogo = ref(form.show_logo ?? false);
+
+// Sync showLogo ref with form.show_logo for better reactivity
+watch(() => form.show_logo, (newVal) => {
+    if (showLogo.value !== (newVal ?? false)) {
+        showLogo.value = newVal ?? false;
+    }
+}, { immediate: true });
+
+watch(showLogo, (newVal) => {
+    if (form.show_logo !== newVal) {
+        form.show_logo = newVal;
+    }
 });
 
 // Options
@@ -157,13 +174,25 @@ const profileUrl = computed(() => {
 // Track blob URLs for cleanup
 const blobUrls = ref<string[]>([]);
 
+// Computed settings object for QrPreview (ensures reactivity)
+const qrSettings = computed(() => ({
+    ...form.data(),
+    show_logo: showLogo.value, // Use reactive ref
+}));
+
 // Get logo URL based on source
 const logoUrl = computed(() => {
-    if (!form.show_logo) return null;
+    // Use reactive ref instead of form property for better reactivity
+    const isLogoEnabled = showLogo.value;
+    const logoSource = form.logo_source || 'organization';
+    
+    if (!isLogoEnabled) {
+        return null;
+    }
 
     let url: string | null = null;
 
-    switch (form.logo_source) {
+    switch (logoSource) {
         case 'organization':
             url = props.organization.logo_url || null;
             break;
@@ -171,13 +200,22 @@ const logoUrl = computed(() => {
             url = props.profile.photo_url || null;
             break;
         case 'custom':
+            // Check for file first (new upload)
             if (form.custom_logo_file instanceof File) {
-                // If it's a File object, create a local URL
+                // Clean up old blob URLs
+                blobUrls.value.forEach((oldUrl) => {
+                    if (oldUrl.startsWith('blob:')) {
+                        URL.revokeObjectURL(oldUrl);
+                    }
+                });
+                blobUrls.value = [];
+                
+                // Create new blob URL
                 const blobUrl = URL.createObjectURL(form.custom_logo_file);
                 blobUrls.value.push(blobUrl);
                 url = blobUrl;
             } else if (form.custom_logo) {
-                // If it's a path string, convert to full URL
+                // Use saved custom logo path
                 url = form.custom_logo.startsWith('http') 
                     ? form.custom_logo 
                     : `${window.location.origin}/storage/${form.custom_logo}`;
@@ -208,6 +246,8 @@ watch(() => props.profile.qr_settings, (newSettings) => {
                 form[key] = mergedSettings[key];
             }
         });
+        // Sync showLogo ref
+        showLogo.value = mergedSettings.show_logo ?? false;
     }
 }, { deep: true, immediate: true });
 
@@ -311,8 +351,7 @@ function handleLogoFile(event: Event) {
                                 <div class="flex items-center gap-3">
                                     <Checkbox
                                         id="use_gradient"
-                                        :checked="form.use_gradient"
-                                        @update:checked="form.use_gradient = $event"
+                                        v-model="form.use_gradient"
                                     />
                                     <Label for="use_gradient" class="cursor-pointer">
                                         Usar degradado
@@ -419,15 +458,14 @@ function handleLogoFile(event: Event) {
                             <div class="flex items-center gap-3">
                                 <Checkbox
                                     id="show_logo"
-                                    :checked="form.show_logo"
-                                    @update:checked="form.show_logo = $event"
+                                    v-model="showLogo"
                                 />
                                 <Label for="show_logo" class="cursor-pointer">
                                     Mostrar logo en el centro del QR
                                 </Label>
                             </div>
 
-                            <div v-if="form.show_logo" class="space-y-4 pl-6">
+                            <div v-if="showLogo" class="space-y-4 pl-6">
                                 <div class="space-y-2">
                                     <Label>Origen del Logo</Label>
                                     <Select v-model="form.logo_source">
@@ -444,6 +482,29 @@ function handleLogoFile(event: Event) {
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
+                                    <!-- Logo preview -->
+                                    <div v-if="logoUrl" class="mt-2 flex items-center gap-2 rounded-lg border p-2">
+                                        <img
+                                            :src="logoUrl"
+                                            alt="Logo preview"
+                                            class="h-12 w-12 rounded object-cover"
+                                            @error="(e) => { console.error('Error loading logo:', logoUrl); e.target.style.display = 'none'; }"
+                                        />
+                                        <span class="text-xs text-muted-foreground">
+                                            Logo seleccionado
+                                        </span>
+                                    </div>
+                                    <div v-else class="mt-2 rounded-lg border border-dashed border-muted-foreground/30 p-2">
+                                        <p class="text-xs text-muted-foreground text-center">
+                                            {{ form.logo_source === 'organization' && !props.organization.logo_url
+                                                ? 'No hay logo de organización disponible'
+                                                : form.logo_source === 'profile' && !props.profile.photo_url
+                                                ? 'No hay foto de perfil disponible'
+                                                : form.logo_source === 'custom' && !form.custom_logo && !form.custom_logo_file
+                                                ? 'Selecciona un logo personalizado'
+                                                : 'No hay logo disponible' }}
+                                        </p>
+                                    </div>
                                 </div>
 
                                 <div v-if="form.logo_source === 'custom'" class="space-y-2">
@@ -489,8 +550,7 @@ function handleLogoFile(event: Event) {
                                 <div class="flex items-center gap-3">
                                     <Checkbox
                                         id="logo_background_enabled"
-                                        :checked="form.logo_background_enabled"
-                                        @update:checked="form.logo_background_enabled = $event"
+                                        v-model="form.logo_background_enabled"
                                     />
                                     <Label for="logo_background_enabled" class="cursor-pointer">
                                         Fondo del logo
@@ -588,14 +648,12 @@ function handleLogoFile(event: Event) {
                         <QrPreview
                             ref="qrPreviewRef"
                             :url="profileUrl"
-                            :settings="form"
+                            :settings="qrSettings"
                             :logo-url="logoUrl"
                         />
                     </div>
 
-                    <div class="mt-4 text-center">
-                        <p class="text-sm text-muted-foreground break-all">{{ profileUrl }}</p>
-                    </div>
+                   
                 </div>
 
                 <!-- Business Card Section -->

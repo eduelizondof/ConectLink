@@ -109,13 +109,23 @@ const qrConfig = computed(() => {
 
     // Add logo if enabled
     if (props.settings.show_logo && props.logoUrl) {
-        config.image = props.logoUrl;
-        config.imageOptions = {
-            crossOrigin: props.logoUrl.startsWith('blob:') ? undefined : 'anonymous',
-            margin: props.settings.logo_margin || 5,
-            imageSize: (props.settings.logo_size || 20) / 100,
-            hideBackgroundDots: true,
-        };
+        // Validate URL is not empty
+        const logoUrlStr = String(props.logoUrl).trim();
+        if (logoUrlStr && logoUrlStr !== 'null' && logoUrlStr !== 'undefined') {
+            try {
+                config.image = logoUrlStr;
+                config.imageOptions = {
+                    crossOrigin: logoUrlStr.startsWith('blob:') ? undefined : 'anonymous',
+                    margin: props.settings.logo_margin || 5,
+                    imageSize: (props.settings.logo_size || 20) / 100,
+                    hideBackgroundDots: true,
+                };
+            } catch (error) {
+                console.error('Error setting logo in QR config:', error, { logoUrl: logoUrlStr });
+            }
+        } else {
+            console.warn('Logo URL is invalid:', props.logoUrl);
+        }
     }
 
     return config;
@@ -139,7 +149,20 @@ function updateQr() {
         return;
     }
 
-    qrCode.value.update(qrConfig.value);
+    // If logo changed, we need to recreate the QR completely
+    // because qr-code-styling sometimes has issues updating images
+    const newConfig = qrConfig.value;
+    const hasLogo = newConfig.image && props.settings.show_logo;
+    const currentHasLogo = qrCode.value && (qrCode.value as any).options?.image;
+
+    // If logo state changed, recreate QR
+    if (hasLogo !== !!currentHasLogo) {
+        initQr();
+        return;
+    }
+
+    // Otherwise just update
+    qrCode.value.update(newConfig);
 }
 
 // Download QR
@@ -156,9 +179,43 @@ function download(format: 'png' | 'svg' = 'png') {
 // Expose download method
 defineExpose({ download });
 
-// Watch for changes
+// Watch for changes - separate watchers for better reactivity
 watch(
-    () => [props.url, props.settings, props.logoUrl],
+    () => props.url,
+    () => {
+        updateQr();
+    }
+);
+
+watch(
+    () => props.settings.show_logo,
+    (newVal, oldVal) => {
+        console.log('show_logo changed:', { from: oldVal, to: newVal, logoUrl: props.logoUrl });
+        updateQr();
+    }
+);
+
+watch(
+    () => props.logoUrl,
+    (newVal, oldVal) => {
+        console.log('logoUrl changed:', { from: oldVal, to: newVal, show_logo: props.settings.show_logo });
+        if (props.settings.show_logo) {
+            updateQr();
+        }
+    }
+);
+
+watch(
+    () => [
+        props.settings.logo_size,
+        props.settings.logo_margin,
+        props.settings.logo_source,
+        props.settings.size,
+        props.settings.foreground_color,
+        props.settings.background_color,
+        props.settings.dot_style,
+        props.settings.corner_style,
+    ],
     () => {
         updateQr();
     },
