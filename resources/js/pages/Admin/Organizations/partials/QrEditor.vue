@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { useSwal } from '@/composables/useSwal';
 import {
@@ -154,38 +154,81 @@ const profileUrl = computed(() => {
     return `${baseUrl}/${props.organization.slug}/${props.profile.slug}`;
 });
 
+// Track blob URLs for cleanup
+const blobUrls = ref<string[]>([]);
+
 // Get logo URL based on source
 const logoUrl = computed(() => {
     if (!form.show_logo) return null;
 
+    let url: string | null = null;
+
     switch (form.logo_source) {
         case 'organization':
-            return props.organization.logo_url;
+            url = props.organization.logo_url || null;
+            break;
         case 'profile':
-            return props.profile.photo_url;
+            url = props.profile.photo_url || null;
+            break;
         case 'custom':
-            return form.custom_logo ? `/storage/${form.custom_logo}` : null;
+            if (form.custom_logo_file instanceof File) {
+                // If it's a File object, create a local URL
+                const blobUrl = URL.createObjectURL(form.custom_logo_file);
+                blobUrls.value.push(blobUrl);
+                url = blobUrl;
+            } else if (form.custom_logo) {
+                // If it's a path string, convert to full URL
+                url = form.custom_logo.startsWith('http') 
+                    ? form.custom_logo 
+                    : `${window.location.origin}/storage/${form.custom_logo}`;
+            }
+            break;
         default:
-            return null;
+            url = null;
     }
+
+    return url;
+});
+
+// Cleanup blob URLs on unmount
+onBeforeUnmount(() => {
+    blobUrls.value.forEach((url) => {
+        URL.revokeObjectURL(url);
+    });
+    blobUrls.value = [];
 });
 
 // Watch for profile changes
-watch(() => props.profile, (newProfile) => {
-    const settings = newProfile.qr_settings || defaultSettings;
-    Object.assign(form, settings);
-}, { deep: true });
+watch(() => props.profile.qr_settings, (newSettings) => {
+    if (newSettings) {
+        // Merge with defaults to ensure all fields are present
+        const mergedSettings = { ...defaultSettings, ...newSettings };
+        Object.keys(mergedSettings).forEach((key) => {
+            if (key in form) {
+                form[key] = mergedSettings[key];
+            }
+        });
+    }
+}, { deep: true, immediate: true });
 
 // Save settings
 function saveSettings() {
     const formData = new FormData();
 
-    // Add all form fields
+    // Add all form fields except custom_logo_file (handled separately)
     Object.entries(form.data()).forEach(([key, value]) => {
-        if (key === 'custom_logo_file' && value instanceof File) {
-            formData.append('custom_logo', value);
-        } else if (value !== null && value !== undefined && key !== 'custom_logo_file') {
-            formData.append(key, String(value));
+        if (key === 'custom_logo_file') {
+            // Handle file upload separately
+            if (value instanceof File) {
+                formData.append('custom_logo', value);
+            }
+        } else if (value !== null && value !== undefined) {
+            // Convert boolean to string for FormData
+            if (typeof value === 'boolean') {
+                formData.append(key, value ? '1' : '0');
+            } else {
+                formData.append(key, String(value));
+            }
         }
     });
 
@@ -194,12 +237,15 @@ function saveSettings() {
 
     router.post(`/admin/profiles/${props.profile.id}/qr-settings`, formData, {
         preserveScroll: true,
+        forceFormData: true,
         onSuccess: () => {
             swal.success('¡Configuración del QR guardada!');
+            // Reload the page data to get updated settings
+            router.reload({ only: ['organization'] });
         },
         onError: (errors) => {
-            console.error(errors);
-            swal.error('Error al guardar la configuración');
+            console.error('Error al guardar:', errors);
+            swal.error('Error al guardar la configuración. Por favor, verifica los datos.');
         },
     });
 }

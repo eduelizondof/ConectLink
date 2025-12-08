@@ -111,7 +111,7 @@ const qrConfig = computed(() => {
     if (props.settings.show_logo && props.logoUrl) {
         config.image = props.logoUrl;
         config.imageOptions = {
-            crossOrigin: 'anonymous',
+            crossOrigin: props.logoUrl.startsWith('blob:') ? undefined : 'anonymous',
             margin: props.settings.logo_margin || 5,
             imageSize: (props.settings.logo_size || 20) / 100,
             hideBackgroundDots: true,

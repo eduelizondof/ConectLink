@@ -27,25 +27,35 @@ class QrBusinessCardController extends Controller
             'corner_style' => ['nullable', 'in:square,rounded,extra-rounded'],
             'corner_color' => ['nullable', 'string', 'max:7', 'regex:/^#[A-Fa-f0-9]{6}$/'],
             // Logo
-            'show_logo' => ['boolean'],
+            'show_logo' => ['sometimes', 'boolean'],
             'logo_source' => ['nullable', 'in:organization,profile,custom'],
             'custom_logo' => ['nullable', 'image', 'max:2048'],
             'logo_size' => ['nullable', 'integer', 'min:10', 'max:40'],
             'logo_shape' => ['nullable', 'in:square,rounded,circle'],
             'logo_background_color' => ['nullable', 'string', 'max:7', 'regex:/^#[A-Fa-f0-9]{6}$/'],
-            'logo_background_enabled' => ['boolean'],
+            'logo_background_enabled' => ['sometimes', 'boolean'],
             'logo_margin' => ['nullable', 'integer', 'min:0', 'max:20'],
             // Error correction
             'error_correction' => ['nullable', 'in:L,M,Q,H'],
             // Size
             'size' => ['nullable', 'integer', 'min:100', 'max:1000'],
             // Gradient
-            'use_gradient' => ['boolean'],
+            'use_gradient' => ['sometimes', 'boolean'],
             'gradient_start_color' => ['nullable', 'string', 'max:7', 'regex:/^#[A-Fa-f0-9]{6}$/'],
             'gradient_end_color' => ['nullable', 'string', 'max:7', 'regex:/^#[A-Fa-f0-9]{6}$/'],
             'gradient_type' => ['nullable', 'in:linear,radial'],
             'gradient_rotation' => ['nullable', 'integer', 'min:0', 'max:360'],
         ]);
+
+        // Convert string booleans to actual booleans
+        $validated['show_logo'] = filter_var($request->input('show_logo', false), FILTER_VALIDATE_BOOLEAN);
+        $validated['logo_background_enabled'] = filter_var($request->input('logo_background_enabled', true), FILTER_VALIDATE_BOOLEAN);
+        $validated['use_gradient'] = filter_var($request->input('use_gradient', false), FILTER_VALIDATE_BOOLEAN);
+
+        // Remove null/empty string values to use defaults
+        $validated = array_filter($validated, function ($value) {
+            return $value !== null && $value !== '';
+        });
 
         // Handle custom logo upload
         if ($request->hasFile('custom_logo')) {
@@ -65,6 +75,10 @@ class QrBusinessCardController extends Controller
             ['profile_id' => $profile->id],
             $validated
         );
+
+        // Reload the profile with updated settings
+        $profile->refresh();
+        $profile->load('qrSettings');
 
         return back()->with('success', '¡Configuración del QR actualizada!');
     }
