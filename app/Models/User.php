@@ -104,7 +104,32 @@ class User extends Authenticatable
      */
     public function getLimits(): UserLimit
     {
-        return $this->limits ?? new UserLimit(UserLimit::getDefaults());
+        // Try to get limits from active subscription
+        $activeSubscription = $this->subscriptions()->with('plan')->active()->first();
+        
+        if ($activeSubscription && $activeSubscription->plan) {
+            $plan = $activeSubscription->plan;
+            $limitData = [
+                'max_organizations' => $plan->max_organizations,
+                'max_profiles_per_org' => $plan->max_profiles_per_org,
+                'max_products_per_org' => $plan->max_products_per_org,
+                'max_custom_links_per_profile' => $plan->max_custom_links_per_profile,
+                'max_social_links_per_profile' => $plan->max_social_links_per_profile,
+                'max_alerts_per_profile' => $plan->max_alerts_per_profile,
+                'can_use_custom_domain' => $plan->can_use_custom_domain,
+                'can_remove_branding' => $plan->can_remove_branding,
+                'can_access_analytics' => $plan->can_access_analytics,
+                'can_upload_images' => $plan->can_upload_images,
+            ];
+            return new UserLimit($limitData);
+        }
+        
+        // Fallback to user_limits table or defaults
+        if ($this->limits) {
+            return $this->limits;
+        }
+        
+        return new UserLimit(UserLimit::getDefaults());
     }
 
     /**

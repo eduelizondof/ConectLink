@@ -47,29 +47,44 @@ class RenewSubscriptionCommand extends Command
             ->orderBy('created_at', 'desc')
             ->first();
 
-        if (!$currentSubscription) {
-            $this->error("User has no subscription. Use account:create --plan=<plan> to create one.");
-            return self::FAILURE;
-        }
-
-        $this->info("Current subscription:");
-        $this->displaySubscription($currentSubscription);
-        $this->newLine();
-
         // Determine plan
         $planSlug = $this->option('plan');
-        $plan = $planSlug
-            ? SubscriptionPlan::where('slug', $planSlug)->first()
-            : $currentSubscription->plan;
-
-        if (!$plan) {
-            $this->error("Plan '{$planSlug}' not found.");
+        
+        // If no current subscription and no plan specified, show error
+        if (!$currentSubscription && !$planSlug) {
+            $this->error("User has no subscription and no plan was specified.");
+            $this->line("Use: php artisan subscription:renew {$email} --plan=<plan-slug>");
             $this->listPlans();
             return self::FAILURE;
         }
 
+        // If no current subscription, use the specified plan
+        if (!$currentSubscription) {
+            $plan = SubscriptionPlan::where('slug', $planSlug)->first();
+            if (!$plan) {
+                $this->error("Plan '{$planSlug}' not found.");
+                $this->listPlans();
+                return self::FAILURE;
+            }
+        } else {
+            $this->info("Current subscription:");
+            $this->displaySubscription($currentSubscription);
+            $this->newLine();
+            
+            // Determine plan from option or current subscription
+            $plan = $planSlug
+                ? SubscriptionPlan::where('slug', $planSlug)->first()
+                : $currentSubscription->plan;
+
+            if (!$plan) {
+                $this->error("Plan '{$planSlug}' not found.");
+                $this->listPlans();
+                return self::FAILURE;
+            }
+        }
+
         // Determine cycle
-        $cycle = $this->option('cycle') ?? $currentSubscription->billing_cycle;
+        $cycle = $this->option('cycle') ?? ($currentSubscription->billing_cycle ?? 'annual');
         $duration = (int) $this->option('duration');
         $extend = $this->option('extend');
 
@@ -82,7 +97,7 @@ class RenewSubscriptionCommand extends Command
         };
 
         // Calculate start and end dates
-        $startsAt = $extend && $currentSubscription->ends_at?->isFuture()
+        $startsAt = ($extend && $currentSubscription && $currentSubscription->ends_at?->isFuture())
             ? $currentSubscription->ends_at
             : now();
 
@@ -94,8 +109,8 @@ class RenewSubscriptionCommand extends Command
             default => $startsAt->copy()->addMonths($duration),
         };
 
-        // Mark old subscription as expired if renewing from now
-        if (!$extend) {
+        // Mark old subscription as expired if renewing from now and subscription exists
+        if ($currentSubscription && !$extend) {
             $currentSubscription->update([
                 'status' => 'expired',
                 'notes' => ($currentSubscription->notes ? $currentSubscription->notes . "\n" : '') .
