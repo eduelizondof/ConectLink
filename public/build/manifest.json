@@ -101,13 +101,13 @@
       "_trash-2-FY7NsgHU.js"
     ]
   },
-  "_DesignEditor.vue_vue_type_script_setup_true_lang-gY5ijCcl.js": {
-    "file": "assets/DesignEditor.vue_vue_type_script_setup_true_lang-gY5ijCcl.js",
+  "_DesignEditor.vue_vue_type_script_setup_true_lang-CAB7pKNy.js": {
+    "file": "assets/DesignEditor.vue_vue_type_script_setup_true_lang-CAB7pKNy.js",
     "name": "DesignEditor.vue_vue_type_script_setup_true_lang",
     "imports": [
       "_vendor-eHrDt6OH.js",
       "_useSwal-DOVGsU6a.js",
-      "_ImageUpload.vue_vue_type_script_setup_true_lang-xpz27FlT.js",
+      "_ImageUpload.vue_vue_type_script_setup_true_lang-DeJ-2Rpg.js",
       "_ColorPicker.vue_vue_type_script_setup_true_lang-C-ZSxaER.js",
       "_Label.vue_vue_type_script_setup_true_lang-BBaMjydA.js",
       "_index-DdtZ7dV8.js",
@@ -169,8 +169,8 @@
       "_x-KLv2TS68.js"
     ]
   },
-  "_ImageUpload.vue_vue_type_script_setup_true_lang-xpz27FlT.js": {
-    "file": "assets/ImageUpload.vue_vue_type_script_setup_true_lang-xpz27FlT.js",
+  "_ImageUpload.vue_vue_type_script_setup_true_lang-DeJ-2Rpg.js": {
+    "file": "assets/ImageUpload.vue_vue_type_script_setup_true_lang-DeJ-2Rpg.js",
     "name": "ImageUpload.vue_vue_type_script_setup_true_lang",
     "imports": [
       "_vendor-eHrDt6OH.js",
@@ -236,13 +236,13 @@
       "_index-DdtZ7dV8.js"
     ]
   },
-  "_ProductsEditor.vue_vue_type_script_setup_true_lang-DUrbKiy3.js": {
-    "file": "assets/ProductsEditor.vue_vue_type_script_setup_true_lang-DUrbKiy3.js",
+  "_ProductsEditor.vue_vue_type_script_setup_true_lang-ChUg68Qu.js": {
+    "file": "assets/ProductsEditor.vue_vue_type_script_setup_true_lang-ChUg68Qu.js",
     "name": "ProductsEditor.vue_vue_type_script_setup_true_lang",
     "imports": [
       "_vendor-eHrDt6OH.js",
       "_useSwal-DOVGsU6a.js",
-      "_ImageUpload.vue_vue_type_script_setup_true_lang-xpz27FlT.js",
+      "_ImageUpload.vue_vue_type_script_setup_true_lang-DeJ-2Rpg.js",
       "_Input.vue_vue_type_script_setup_true_lang-BnuwhoGL.js",
       "_Label.vue_vue_type_script_setup_true_lang-BBaMjydA.js",
       "_index-DdtZ7dV8.js",
@@ -256,13 +256,13 @@
       "_star-Co3dg2Gr.js"
     ]
   },
-  "_ProfileEditor.vue_vue_type_script_setup_true_lang-Bks4G3Vt.js": {
-    "file": "assets/ProfileEditor.vue_vue_type_script_setup_true_lang-Bks4G3Vt.js",
+  "_ProfileEditor.vue_vue_type_script_setup_true_lang-DT-ltv0A.js": {
+    "file": "assets/ProfileEditor.vue_vue_type_script_setup_true_lang-DT-ltv0A.js",
     "name": "ProfileEditor.vue_vue_type_script_setup_true_lang",
     "imports": [
       "_vendor-eHrDt6OH.js",
       "_useSwal-DOVGsU6a.js",
-      "_ImageUpload.vue_vue_type_script_setup_true_lang-xpz27FlT.js",
+      "_ImageUpload.vue_vue_type_script_setup_true_lang-DeJ-2Rpg.js",
       "_Input.vue_vue_type_script_setup_true_lang-BnuwhoGL.js",
       "_Label.vue_vue_type_script_setup_true_lang-BBaMjydA.js",
       "_index-DdtZ7dV8.js",
@@ -291,8 +291,8 @@
       "_vendor-eHrDt6OH.js"
     ]
   },
-  "_QrEditor.vue_vue_type_script_setup_true_lang-BBoEcu1e.js": {
-    "file": "assets/QrEditor.vue_vue_type_script_setup_true_lang-BBoEcu1e.js",
+  "_QrEditor.vue_vue_type_script_setup_true_lang-IwS70WKK.js": {
+    "file": "assets/QrEditor.vue_vue_type_script_setup_true_lang-IwS70WKK.js",
     "name": "QrEditor.vue_vue_type_script_setup_true_lang",
     "imports": [
       "_vendor-eHrDt6OH.js",
@@ -715,7 +715,7 @@
     ]
   },
   "resources/js/app.ts": {
-    "file": "assets/app-DKK9D5LT.js",
+    "file": "assets/app-CR9IWlbl.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
@@ -753,7 +753,7 @@
       "resources/js/pages/settings/TwoFactor.vue"
     ],
     "css": [
-      "assets/app-D4Ltl8pm.css"
+      "assets/app-054L3noo.css"
     ]
   },
   "resources/js/pages/Admin/Dashboard.vue": {
@@ -794,7 +794,7 @@
     ]
   },
   "resources/js/pages/Admin/Organizations/Create.vue": {
-    "file": "assets/Create-BFchGllm.js",
+    "file": "assets/Create-CWyHR9KA.js",
     "name": "Create",
     "src": "resources/js/pages/Admin/Organizations/Create.vue",
     "isDynamicEntry": true,
@@ -803,7 +803,7 @@
       "_AppLayout.vue_vue_type_script_setup_true_lang-D5xb2Ll6.js",
       "_useSwal-DOVGsU6a.js",
       "_RadioCard.vue_vue_type_script_setup_true_lang-kM1deVV8.js",
-      "_ImageUpload.vue_vue_type_script_setup_true_lang-xpz27FlT.js",
+      "_ImageUpload.vue_vue_type_script_setup_true_lang-DeJ-2Rpg.js",
       "_Input.vue_vue_type_script_setup_true_lang-BnuwhoGL.js",
       "_Label.vue_vue_type_script_setup_true_lang-BBaMjydA.js",
       "_index-DdtZ7dV8.js",
@@ -830,7 +830,7 @@
     ]
   },
   "resources/js/pages/Admin/Organizations/Edit.vue": {
-    "file": "assets/Edit-Dh4NCwT0.js",
+    "file": "assets/Edit-CRLiMlrX.js",
     "name": "Edit",
     "src": "resources/js/pages/Admin/Organizations/Edit.vue",
     "isDynamicEntry": true,
@@ -839,7 +839,7 @@
       "_AppLayout.vue_vue_type_script_setup_true_lang-D5xb2Ll6.js",
       "_useSwal-DOVGsU6a.js",
       "_RadioCard.vue_vue_type_script_setup_true_lang-kM1deVV8.js",
-      "_ImageUpload.vue_vue_type_script_setup_true_lang-xpz27FlT.js",
+      "_ImageUpload.vue_vue_type_script_setup_true_lang-DeJ-2Rpg.js",
       "_Input.vue_vue_type_script_setup_true_lang-BnuwhoGL.js",
       "_Label.vue_vue_type_script_setup_true_lang-BBaMjydA.js",
       "_index-DdtZ7dV8.js",
@@ -849,13 +849,13 @@
       "_Collection-BPzMFEem.js",
       "_RovingFocusGroup-Pncf6S9M.js",
       "_ProfilePreview.vue_vue_type_script_setup_true_lang-DEbQpaTD.js",
-      "_ProfileEditor.vue_vue_type_script_setup_true_lang-Bks4G3Vt.js",
-      "_DesignEditor.vue_vue_type_script_setup_true_lang-gY5ijCcl.js",
-      "_ProductsEditor.vue_vue_type_script_setup_true_lang-DUrbKiy3.js",
+      "_ProfileEditor.vue_vue_type_script_setup_true_lang-DT-ltv0A.js",
+      "_DesignEditor.vue_vue_type_script_setup_true_lang-CAB7pKNy.js",
+      "_ProductsEditor.vue_vue_type_script_setup_true_lang-ChUg68Qu.js",
       "_SocialLinksEditor.vue_vue_type_script_setup_true_lang-BNlaGNpr.js",
       "_CustomLinksEditor.vue_vue_type_script_setup_true_lang-Cihule2d.js",
       "_AlertsEditor.vue_vue_type_script_setup_true_lang-cZPX_maA.js",
-      "_QrEditor.vue_vue_type_script_setup_true_lang-BBoEcu1e.js",
+      "_QrEditor.vue_vue_type_script_setup_true_lang-IwS70WKK.js",
       "_eye-DDtDiHrf.js",
       "_users-B7VzVMnY.js",
       "_palette-CruBC_89.js",
@@ -1004,15 +1004,15 @@
     ]
   },
   "resources/js/pages/Admin/Organizations/partials/DesignEditor.vue": {
-    "file": "assets/DesignEditor-D_oH1IUR.js",
+    "file": "assets/DesignEditor-tkPP1bWN.js",
     "name": "DesignEditor",
     "src": "resources/js/pages/Admin/Organizations/partials/DesignEditor.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_DesignEditor.vue_vue_type_script_setup_true_lang-gY5ijCcl.js",
+      "_DesignEditor.vue_vue_type_script_setup_true_lang-CAB7pKNy.js",
       "_vendor-eHrDt6OH.js",
       "_useSwal-DOVGsU6a.js",
-      "_ImageUpload.vue_vue_type_script_setup_true_lang-xpz27FlT.js",
+      "_ImageUpload.vue_vue_type_script_setup_true_lang-DeJ-2Rpg.js",
       "_x-KLv2TS68.js",
       "_createLucideIcon-jrbd9Vvj.js",
       "_image-CWtdtVbT.js",
@@ -1043,15 +1043,15 @@
     ]
   },
   "resources/js/pages/Admin/Organizations/partials/ProductsEditor.vue": {
-    "file": "assets/ProductsEditor-CmKTkFgN.js",
+    "file": "assets/ProductsEditor-BLr7sfpK.js",
     "name": "ProductsEditor",
     "src": "resources/js/pages/Admin/Organizations/partials/ProductsEditor.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_ProductsEditor.vue_vue_type_script_setup_true_lang-DUrbKiy3.js",
+      "_ProductsEditor.vue_vue_type_script_setup_true_lang-ChUg68Qu.js",
       "_vendor-eHrDt6OH.js",
       "_useSwal-DOVGsU6a.js",
-      "_ImageUpload.vue_vue_type_script_setup_true_lang-xpz27FlT.js",
+      "_ImageUpload.vue_vue_type_script_setup_true_lang-DeJ-2Rpg.js",
       "_x-KLv2TS68.js",
       "_createLucideIcon-jrbd9Vvj.js",
       "_image-CWtdtVbT.js",
@@ -1078,15 +1078,15 @@
     ]
   },
   "resources/js/pages/Admin/Organizations/partials/ProfileEditor.vue": {
-    "file": "assets/ProfileEditor-BUr9z8l4.js",
+    "file": "assets/ProfileEditor-Cmx6rQtx.js",
     "name": "ProfileEditor",
     "src": "resources/js/pages/Admin/Organizations/partials/ProfileEditor.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_ProfileEditor.vue_vue_type_script_setup_true_lang-Bks4G3Vt.js",
+      "_ProfileEditor.vue_vue_type_script_setup_true_lang-DT-ltv0A.js",
       "_vendor-eHrDt6OH.js",
       "_useSwal-DOVGsU6a.js",
-      "_ImageUpload.vue_vue_type_script_setup_true_lang-xpz27FlT.js",
+      "_ImageUpload.vue_vue_type_script_setup_true_lang-DeJ-2Rpg.js",
       "_x-KLv2TS68.js",
       "_createLucideIcon-jrbd9Vvj.js",
       "_image-CWtdtVbT.js",
@@ -1133,12 +1133,12 @@
     ]
   },
   "resources/js/pages/Admin/Organizations/partials/QrEditor.vue": {
-    "file": "assets/QrEditor-BKEm5DiW.js",
+    "file": "assets/QrEditor-CrRerSl_.js",
     "name": "QrEditor",
     "src": "resources/js/pages/Admin/Organizations/partials/QrEditor.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_QrEditor.vue_vue_type_script_setup_true_lang-BBoEcu1e.js",
+      "_QrEditor.vue_vue_type_script_setup_true_lang-IwS70WKK.js",
       "_vendor-eHrDt6OH.js",
       "_useSwal-DOVGsU6a.js",
       "_Label.vue_vue_type_script_setup_true_lang-BBaMjydA.js",
@@ -1305,7 +1305,7 @@
     ]
   },
   "resources/js/pages/Welcome.vue": {
-    "file": "assets/Welcome-Dh-UmNVc.js",
+    "file": "assets/Welcome-CGU7RXU_.js",
     "name": "Welcome",
     "src": "resources/js/pages/Welcome.vue",
     "isDynamicEntry": true,
@@ -1329,7 +1329,7 @@
       "_users-B7VzVMnY.js"
     ],
     "css": [
-      "assets/Welcome-CHAGFZwN.css"
+      "assets/Welcome-Bn5q3Efx.css"
     ]
   },
   "resources/js/pages/auth/ConfirmPassword.vue": {
@@ -1476,7 +1476,7 @@
     ]
   },
   "resources/js/pages/settings/Appearance.vue": {
-    "file": "assets/Appearance-CM5H1a5C.js",
+    "file": "assets/Appearance-De6qa5zU.js",
     "name": "Appearance",
     "src": "resources/js/pages/settings/Appearance.vue",
     "isDynamicEntry": true,

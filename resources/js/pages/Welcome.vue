@@ -117,7 +117,7 @@ const navLinks = [
                         <Globe class="h-5 w-5 text-white" />
                     </div>
                     <span class="font-display text-xl font-bold">
-                        <span class="gradient-text-connect">Conect</span><span class="text-white">Link</span>
+                        <span class="gradient-text-connect"></span><span class="text-white">Link</span>
                     </span>
                 </button>
 
@@ -173,7 +173,7 @@ const navLinks = [
                     <Globe class="h-5 w-5 text-white" />
                 </div>
                 <span class="font-display text-xl font-bold">
-                    <span class="gradient-text-connect">Conect</span><span class="text-white">Link</span>
+                    <span class="gradient-text-connect">Link</span><span class="text-white"></span>
                 </span>
             </button>
         </header>
@@ -473,7 +473,7 @@ const navLinks = [
                                 <Globe class="h-4 w-4 text-white" />
                             </div>
                             <span class="font-display text-lg font-bold">
-                                <span class="gradient-text-connect">Conect</span><span class="text-white">Link</span>
+                                <span class="gradient-text-connect">Link</span><span class="text-white"></span>
                             </span>
                         </div>
 
