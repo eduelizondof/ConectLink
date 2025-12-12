@@ -250,14 +250,18 @@ function formatPrice(price: number, currency: string) {
                 class="group rounded-xl border bg-card overflow-hidden transition-all hover:shadow-md"
             >
                 <!-- Image -->
-                <div class="aspect-square bg-muted relative">
+                <div class="aspect-square bg-muted relative overflow-hidden">
                     <img
                         v-if="product.image"
-                        :src="`/storage/${product.image}`"
+                        :src="product.image.startsWith('http') || product.image.startsWith('/') ? product.image : `/storage/${product.image}`"
                         :alt="product.name"
                         class="h-full w-full object-cover"
+                        @error="(e) => { e.target.style.display = 'none'; }"
                     />
-                    <div v-else class="h-full w-full flex items-center justify-center">
+                    <div 
+                        v-if="!product.image"
+                        class="h-full w-full flex items-center justify-center"
+                    >
                         <Package class="h-16 w-16 text-muted-foreground/30" />
                     </div>
 

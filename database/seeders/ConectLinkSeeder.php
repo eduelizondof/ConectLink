@@ -395,7 +395,7 @@ class ConectLinkSeeder extends Seeder
             'address_city' => 'Monterrey',
             'address_state' => 'Nuevo León',
             'address_country' => 'México',
-            'website' => 'https://conectlink.cnva.mx/dubacano/carlos-garcia',
+            'website' => 'https://link.cnva.mx/dubacano/carlos-garcia',
             'is_active' => true,
             'include_photo' => true,
         ]);
@@ -543,7 +543,7 @@ class ConectLinkSeeder extends Seeder
             'address_state' => 'Nuevo León',
             'address_zip' => '64000',
             'address_country' => 'México',
-            'website' => 'https://conectlink.cnva.mx/dubacano/roberto-martinez',
+            'website' => 'https://link.cnva.mx/dubacano/roberto-martinez',
             'notes' => 'CEO y Fundador de Dubacano. 15+ años de experiencia en distribución de frutas.',
             'is_active' => true,
             'include_photo' => true,
@@ -578,7 +578,7 @@ class ConectLinkSeeder extends Seeder
             $this->command->info('  - Subscriptions: 3 annual Empresarial plans');
         }
 
-        $this->command->info('✅ ConectLink seeder completed!');
+        $this->command->info('✅ link seeder completed!');
         $this->command->info('');
         $this->command->info('Created:');
         $this->command->info('  - Organization: Dubacano (slug: dubacano)');

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Upload, X, Image as ImageIcon } from 'lucide-vue-next';
 
 const props = defineProps<{
@@ -32,8 +32,28 @@ const aspectClass = computed(() => {
 
 const displayImage = computed(() => {
     if (previewUrl.value) return previewUrl.value;
-    if (props.currentImage) return `/storage/${props.currentImage}`;
+    if (props.currentImage) {
+        // Handle different image path formats
+        if (props.currentImage.startsWith('http') || props.currentImage.startsWith('/')) {
+            return props.currentImage;
+        }
+        return `/storage/${props.currentImage}`;
+    }
     return null;
+});
+
+// Clear preview when modelValue is cleared or currentImage changes
+watch(() => props.modelValue, (newValue) => {
+    if (!newValue && !props.currentImage) {
+        previewUrl.value = null;
+    }
+});
+
+watch(() => props.currentImage, () => {
+    // Only clear preview if modelValue is also null/cleared
+    if (!props.modelValue) {
+        previewUrl.value = null;
+    }
 });
 
 function handleFile(file: File) {
@@ -72,7 +92,13 @@ function onDrop(e: DragEvent) {
 function onFileChange(e: Event) {
     const target = e.target as HTMLInputElement;
     const file = target.files?.[0];
-    if (file) handleFile(file);
+    if (file) {
+        handleFile(file);
+    }
+    // Reset input to allow selecting the same file again
+    if (target) {
+        target.value = '';
+    }
 }
 
 function triggerFileInput() {
@@ -140,10 +166,14 @@ function removeImage() {
                     <p class="mt-1 text-xs text-muted-foreground">
                         o haz clic para seleccionar
                     </p>
-                    <span class="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground pointer-events-auto hover:bg-primary/90">
+                    <button
+                        type="button"
+                        class="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground pointer-events-auto hover:bg-primary/90"
+                        @click.stop="triggerFileInput"
+                    >
                         <Upload class="h-4 w-4" />
                         Subir Imagen
-                    </span>
+                    </button>
                 </div>
             </template>
         </div>

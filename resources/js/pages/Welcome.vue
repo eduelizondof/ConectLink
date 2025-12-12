@@ -94,7 +94,7 @@ const navLinks = [
 
 <template>
     <Head title="Tu tarjeta digital inteligente">
-        <meta name="description" content="ConectLink - La forma más fácil, moderna y profesional de compartir toda tu información, enlaces y catálogos desde un solo lugar." />
+        <meta name="description" content="Link - La forma más fácil, moderna y profesional de compartir toda tu información, enlaces y catálogos desde un solo lugar." />
     </Head>
 
     <!-- Background -->
@@ -309,14 +309,14 @@ const navLinks = [
                     <!-- Section Header -->
                     <div class="mb-16 text-center">
                         <span class="mb-4 inline-block rounded-full border border-cyan-500/30 bg-cyan-500/10 px-4 py-1 text-sm font-medium text-cyan-400">
-                            ¿Qué es ConectLink?
+                            ¿Qué es Link de CNVA?
                         </span>
                         <h2 class="mb-6 font-display text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
                             Tu presencia digital
                             <span class="gradient-text"> profesional</span>
                         </h2>
                         <p class="mx-auto max-w-3xl text-lg text-white/70">
-                            ConectLink es una tarjeta de presentación digital diseñada por 
+                            Link es una tarjeta de presentación digital diseñada por 
                             <span class="font-semibold text-cyan-400">Conectiva ITS</span>, creada para que profesionales, 
                             emprendedores y negocios compartan toda su información con un solo clic. 
                             Personaliza tu página, organiza tus enlaces, muestra tu catálogo, comparte tu contacto 
@@ -435,7 +435,7 @@ const navLinks = [
                                 <br />comparte más fácil
                             </h2>
                             <p class="mx-auto mb-8 max-w-xl text-lg text-white/70">
-                                ConectLink te ayuda a destacar. Haz que tus clientes te encuentren rápido 
+                                Link te ayuda a destacar. Haz que tus clientes te encuentren rápido 
                                 y ofrece una experiencia moderna. Todo desde un solo enlace.
                             </p>
                             
@@ -479,8 +479,8 @@ const navLinks = [
 
                         <!-- Copyright -->
                         <p class="text-center text-sm text-white/50">
-                            © {{ new Date().getFullYear() }} ConectLink. Un producto de
-                            <a href="https://conectiva-its.com" target="_blank" class="font-medium text-cyan-400 hover:underline">
+                            © {{ new Date().getFullYear() }} Link. Un producto de
+                            <a href="https://conectivaits.mx" target="_blank" class="font-medium text-cyan-400 hover:underline">
                                 Conectiva ITS
                             </a>
                         </p>
