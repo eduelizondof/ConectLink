@@ -348,8 +348,8 @@
       "_check-Bmkmct5U.js"
     ]
   },
-  "_SocialLinksEditor.vue_vue_type_script_setup_true_lang-BNlaGNpr.js": {
-    "file": "assets/SocialLinksEditor.vue_vue_type_script_setup_true_lang-BNlaGNpr.js",
+  "_SocialLinksEditor.vue_vue_type_script_setup_true_lang-BH-tEj3Q.js": {
+    "file": "assets/SocialLinksEditor.vue_vue_type_script_setup_true_lang-BH-tEj3Q.js",
     "name": "SocialLinksEditor.vue_vue_type_script_setup_true_lang",
     "imports": [
       "_vendor-eHrDt6OH.js",
@@ -364,6 +364,8 @@
       "_link-2-DjUyE574.js",
       "_youtube-BlCkPk2S.js",
       "_mail-ChDI2l3C.js",
+      "_twitch-FfWdu5Rc.js",
+      "_createLucideIcon-jrbd9Vvj.js",
       "_trash-2-FY7NsgHU.js"
     ]
   },
@@ -660,6 +662,13 @@
       "_createLucideIcon-jrbd9Vvj.js"
     ]
   },
+  "_twitch-FfWdu5Rc.js": {
+    "file": "assets/twitch-FfWdu5Rc.js",
+    "name": "twitch",
+    "imports": [
+      "_createLucideIcon-jrbd9Vvj.js"
+    ]
+  },
   "_useArrowNavigation-C6Y-ieo6.js": {
     "file": "assets/useArrowNavigation-C6Y-ieo6.js",
     "name": "useArrowNavigation"
@@ -715,7 +724,7 @@
     ]
   },
   "resources/js/app.ts": {
-    "file": "assets/app-CR9IWlbl.js",
+    "file": "assets/app-DWnack3V.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
@@ -830,7 +839,7 @@
     ]
   },
   "resources/js/pages/Admin/Organizations/Edit.vue": {
-    "file": "assets/Edit-CRLiMlrX.js",
+    "file": "assets/Edit-CGwWJyTM.js",
     "name": "Edit",
     "src": "resources/js/pages/Admin/Organizations/Edit.vue",
     "isDynamicEntry": true,
@@ -852,7 +861,7 @@
       "_ProfileEditor.vue_vue_type_script_setup_true_lang-DT-ltv0A.js",
       "_DesignEditor.vue_vue_type_script_setup_true_lang-CAB7pKNy.js",
       "_ProductsEditor.vue_vue_type_script_setup_true_lang-ChUg68Qu.js",
-      "_SocialLinksEditor.vue_vue_type_script_setup_true_lang-BNlaGNpr.js",
+      "_SocialLinksEditor.vue_vue_type_script_setup_true_lang-BH-tEj3Q.js",
       "_CustomLinksEditor.vue_vue_type_script_setup_true_lang-Cihule2d.js",
       "_AlertsEditor.vue_vue_type_script_setup_true_lang-cZPX_maA.js",
       "_QrEditor.vue_vue_type_script_setup_true_lang-IwS70WKK.js",
@@ -893,6 +902,7 @@
       "_sparkles-BA9B4CV3.js",
       "_tag--yQnzEML.js",
       "_star-Co3dg2Gr.js",
+      "_twitch-FfWdu5Rc.js",
       "_info-t2__ETNV.js",
       "_triangle-alert-C6W3dJSo.js",
       "_megaphone-CW2p57C3.js",
@@ -1181,12 +1191,12 @@
     ]
   },
   "resources/js/pages/Admin/Organizations/partials/SocialLinksEditor.vue": {
-    "file": "assets/SocialLinksEditor-t_IO55aw.js",
+    "file": "assets/SocialLinksEditor-CEskaoye.js",
     "name": "SocialLinksEditor",
     "src": "resources/js/pages/Admin/Organizations/partials/SocialLinksEditor.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_SocialLinksEditor.vue_vue_type_script_setup_true_lang-BNlaGNpr.js",
+      "_SocialLinksEditor.vue_vue_type_script_setup_true_lang-BH-tEj3Q.js",
       "_vendor-eHrDt6OH.js",
       "_useSwal-DOVGsU6a.js",
       "_Input.vue_vue_type_script_setup_true_lang-BnuwhoGL.js",
@@ -1210,6 +1220,7 @@
       "_link-2-DjUyE574.js",
       "_youtube-BlCkPk2S.js",
       "_mail-ChDI2l3C.js",
+      "_twitch-FfWdu5Rc.js",
       "_trash-2-FY7NsgHU.js"
     ]
   },
@@ -1274,7 +1285,7 @@
     ]
   },
   "resources/js/pages/Public/ProfilePage.vue": {
-    "file": "assets/ProfilePage-84MeUlFj.js",
+    "file": "assets/ProfilePage-BWBKNQja.js",
     "name": "ProfilePage",
     "src": "resources/js/pages/Public/ProfilePage.vue",
     "isDynamicEntry": true,
@@ -1294,11 +1305,12 @@
       "_star-Co3dg2Gr.js",
       "_mail-ChDI2l3C.js",
       "_globe-D9nFS-G6.js",
-      "_createLucideIcon-jrbd9Vvj.js",
+      "_twitch-FfWdu5Rc.js",
       "_megaphone-CW2p57C3.js",
       "_circle-alert-BToKRREl.js",
       "_tag--yQnzEML.js",
-      "_info-t2__ETNV.js"
+      "_info-t2__ETNV.js",
+      "_createLucideIcon-jrbd9Vvj.js"
     ],
     "css": [
       "assets/ProfilePage-DnjTktD6.css"
@@ -1476,7 +1488,7 @@
     ]
   },
   "resources/js/pages/settings/Appearance.vue": {
-    "file": "assets/Appearance-De6qa5zU.js",
+    "file": "assets/Appearance-DsX4FmPb.js",
     "name": "Appearance",
     "src": "resources/js/pages/settings/Appearance.vue",
     "isDynamicEntry": true,
