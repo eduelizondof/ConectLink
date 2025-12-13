@@ -216,17 +216,17 @@ class ProfileController extends Controller
                 $updateData
             );
 
-            return back()->with('success', '¡Configuración guardada!');
+            return redirect()->back()->with('success', '¡Configuración guardada!');
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Return validation errors properly for Inertia
-            return back()->withErrors($e->errors())->withInput();
+            return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             \Log::error('Error in updateSettings: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
                 'profile_id' => $profile->id,
             ]);
             
-            return back()->with('error', 'Error al guardar: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error al guardar: ' . $e->getMessage());
         }
     }
 
