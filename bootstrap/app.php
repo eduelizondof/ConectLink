@@ -24,7 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Handle authorization exceptions for Inertia requests
-        $exceptions->respond(function (\Symfony\Component\HttpFoundation\Response $response, \Throwable $exception, \Illuminate\Http\Request $request) {
+        $exceptions->respond(function ($response, \Throwable $exception, \Illuminate\Http\Request $request) {
             if ($exception instanceof \Illuminate\Auth\Access\AuthorizationException) {
                 // Check if it's an Inertia request
                 if ($request->header('X-Inertia') || $request->header('X-Inertia-Version')) {
@@ -41,5 +41,8 @@ return Application::configure(basePath: dirname(__DIR__))
                 // For regular requests
                 abort(403, 'No tienes permiso para realizar esta acción.');
             }
+            
+            // Let Laravel/Inertia handle validation exceptions automatically
+            // Don't return anything to let the default handler process it
         });
     })->create();

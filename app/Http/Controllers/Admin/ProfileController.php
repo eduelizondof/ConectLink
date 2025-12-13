@@ -218,9 +218,14 @@ class ProfileController extends Controller
 
             return back()->with('success', '¡Configuración guardada!');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            throw $e;
+            // Return validation errors properly for Inertia
+            return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
-            \Log::error('Error in updateSettings: ' . $e->getMessage());
+            \Log::error('Error in updateSettings: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'profile_id' => $profile->id,
+            ]);
+            
             return back()->with('error', 'Error al guardar: ' . $e->getMessage());
         }
     }
