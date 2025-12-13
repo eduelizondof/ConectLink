@@ -2,7 +2,7 @@
 import { ref, computed, watch, onBeforeUnmount } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { useSwal } from '@/composables/useSwal';
-import {
+import { 
     Palette,
     Image,
     Sparkles,

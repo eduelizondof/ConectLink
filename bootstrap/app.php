@@ -25,6 +25,26 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         // Handle authorization exceptions for Inertia requests
         $exceptions->render(function (\Throwable $exception, \Illuminate\Http\Request $request) {
+            // Handle validation exceptions for Inertia requests
+            if ($exception instanceof \Illuminate\Validation\ValidationException) {
+                // For Inertia requests, return a redirect with errors
+                // This allows Inertia to handle the validation errors properly
+                if ($request->header('X-Inertia') || $request->header('X-Inertia-Version')) {
+                    return redirect()->back()->withErrors($exception->errors())->withInput();
+                }
+                
+                // For API requests, return JSON
+                if ($request->expectsJson() || $request->is('api/*')) {
+                    return response()->json([
+                        'message' => 'The given data was invalid.',
+                        'errors' => $exception->errors(),
+                    ], 422);
+                }
+                
+                // For regular requests, let Laravel handle it
+                return null;
+            }
+            
             if ($exception instanceof \Illuminate\Auth\Access\AuthorizationException) {
                 // Check if it's an Inertia request
                 if ($request->header('X-Inertia') || $request->header('X-Inertia-Version')) {
@@ -42,6 +62,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 abort(403, 'No tienes permiso para realizar esta acción.');
             }
             
-            // Let Laravel/Inertia handle all other exceptions (including validation) automatically
+            // Return null to let Laravel handle all other exceptions with default handler
+            return null;
         });
     })->create();
