@@ -1,22 +1,7 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import {
-    Facebook,
-    Instagram,
-    Twitter,
-    Linkedin,
-    Youtube,
-    Github,
-    Globe,
-    Mail,
-    Phone,
-    Link2,
-    MessageCircle,
-    Send,
-    Music,
-    Twitch,
-    ExternalLink,
     Download,
     X,
     ChevronRight,
@@ -25,8 +10,6 @@ import {
     Star,
     Eye,
     Share2,
-    MapPin,
-    Briefcase,
     Package,
     Sparkles,
     AlertCircle,
@@ -34,6 +17,29 @@ import {
     CheckCircle,
     Megaphone,
 } from 'lucide-vue-next';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import {
+    faFacebook,
+    faInstagram,
+    faTwitter,
+    faLinkedin,
+    faYoutube,
+    faGithub,
+    faTiktok,
+    faWhatsapp,
+    faTelegram,
+    faPinterest,
+    faSnapchat,
+    faThreads,
+    faDribbble,
+    faBehance,
+    faSpotify,
+    faSoundcloud,
+    faTwitch,
+    faDiscord,
+    faApple,
+} from '@fortawesome/free-brands-svg-icons';
+import { faGlobe, faEnvelope, faPhone, faLink } from '@fortawesome/free-solid-svg-icons';
 import { GlowingBorder, ProfileParticles } from '@/components/effects';
 
 // Props from controller
@@ -347,22 +353,31 @@ function getGradientDirection(direction: string): string {
 
 function getSocialIcon(platform: string) {
     const icons: Record<string, any> = {
-        facebook: Facebook,
-        instagram: Instagram,
-        twitter: Twitter,
-        linkedin: Linkedin,
-        youtube: Youtube,
-        github: Github,
-        whatsapp: MessageCircle,
-        telegram: Send,
-        spotify: Music,
-        twitch: Twitch,
-        website: Globe,
-        email: Mail,
-        phone: Phone,
-        other: Link2,
+        facebook: faFacebook,
+        instagram: faInstagram,
+        twitter: faTwitter,
+        linkedin: faLinkedin,
+        youtube: faYoutube,
+        github: faGithub,
+        tiktok: faTiktok,
+        whatsapp: faWhatsapp,
+        telegram: faTelegram,
+        pinterest: faPinterest,
+        snapchat: faSnapchat,
+        threads: faThreads,
+        dribbble: faDribbble,
+        behance: faBehance,
+        spotify: faSpotify,
+        apple_music: faApple,
+        soundcloud: faSoundcloud,
+        twitch: faTwitch,
+        discord: faDiscord,
+        website: faGlobe,
+        email: faEnvelope,
+        phone: faPhone,
+        other: faLink,
     };
-    return icons[platform] || Link2;
+    return icons[platform] || faLink;
 }
 
 function getAlertIcon(type: string) {
@@ -439,7 +454,7 @@ async function shareProfile() {
     if (navigator.share) {
         try {
             await navigator.share({ title, url });
-        } catch (e) {
+        } catch {
             showShareMenu.value = true;
         }
     } else {
@@ -572,7 +587,7 @@ onMounted(() => {
                         }"
                         :title="link.label"
                     >
-                        <component :is="getSocialIcon(link.platform)" class="w-5 h-5" />
+                        <font-awesome-icon :icon="getSocialIcon(link.platform)" class="w-5 h-5" />
                     </a>
                 </template>
 
@@ -590,7 +605,7 @@ onMounted(() => {
                             color: '#ffffff',
                         }"
                     >
-                        <component :is="getSocialIcon(link.platform)" class="w-4 h-4" />
+                        <font-awesome-icon :icon="getSocialIcon(link.platform)" class="w-4 h-4" />
                         <span class="text-sm font-medium">{{ link.label }}</span>
                     </a>
                 </template>
@@ -610,7 +625,7 @@ onMounted(() => {
                             border: `1px solid ${settings.social_colored ? link.brand_color : settings.primary_color}`,
                         }"
                     >
-                        <component :is="getSocialIcon(link.platform)" class="w-4 h-4" />
+                        <font-awesome-icon :icon="getSocialIcon(link.platform)" class="w-4 h-4" />
                         <span class="text-sm font-medium">{{ link.label }}</span>
                     </a>
                 </template>
@@ -999,7 +1014,7 @@ onMounted(() => {
                             class="flex items-center justify-center gap-2 w-full py-4 rounded-xl font-semibold text-white transition-all duration-300 hover:scale-[1.02]"
                             :style="{ backgroundColor: '#25D366' }"
                         >
-                            <MessageCircle class="w-5 h-5" />
+                            <font-awesome-icon :icon="faWhatsapp" class="w-5 h-5" />
                             Consultar por WhatsApp
                         </a>
                     </div>
@@ -1022,7 +1037,7 @@ onMounted(() => {
                             @click="copyToClipboard"
                             class="flex items-center gap-3 w-full p-3 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors"
                         >
-                            <Link2 class="w-5 h-5 text-gray-600" />
+                            <font-awesome-icon :icon="faLink" class="w-5 h-5 text-gray-600" />
                             <span class="font-medium text-gray-700">Copiar enlace</span>
                         </button>
                         <a
@@ -1030,7 +1045,7 @@ onMounted(() => {
                             target="_blank"
                             class="flex items-center gap-3 w-full p-3 rounded-xl bg-green-50 hover:bg-green-100 transition-colors"
                         >
-                            <MessageCircle class="w-5 h-5 text-green-600" />
+                            <font-awesome-icon :icon="faWhatsapp" class="w-5 h-5 text-green-600" />
                             <span class="font-medium text-green-700">Compartir en WhatsApp</span>
                         </a>
                     </div>
