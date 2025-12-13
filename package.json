@@ -30,6 +30,10 @@
         "vue-tsc": "^2.2.4"
     },
     "dependencies": {
+        "@fortawesome/fontawesome-svg-core": "^7.1.0",
+        "@fortawesome/free-brands-svg-icons": "^7.1.0",
+        "@fortawesome/free-solid-svg-icons": "^7.1.0",
+        "@fortawesome/vue-fontawesome": "^3.1.2",
         "@inertiajs/vue3": "^2.1.0",
         "@radix-ui/react-tabs": "^1.1.13",
         "@tsparticles/slim": "^3.9.1",

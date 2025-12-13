@@ -128,94 +128,120 @@ class ProfileController extends Controller
     {
         $this->authorize('update', $profile->organization);
 
-        $validated = $request->validate([
-            // Background
-            'background_type' => ['required', 'in:solid,gradient,image'],
-            'background_color' => ['nullable', 'string', 'max:7'],
-            'background_gradient_start' => ['nullable', 'string', 'max:7'],
-            'background_gradient_end' => ['nullable', 'string', 'max:7'],
-            'background_gradient_direction' => ['nullable', 'in:to-b,to-r,to-br,to-bl'],
-            'background_image' => ['nullable', 'image', 'max:4096'],
-            'background_overlay_opacity' => ['nullable', 'integer', 'min:0', 'max:100'],
-            'background_pattern' => ['nullable', 'in:none,dots,grid,waves,noise'],
-            'background_pattern_opacity' => ['nullable', 'integer', 'min:0', 'max:100'],
-
-            // Colors
-            'primary_color' => ['nullable', 'string', 'max:7'],
-            'secondary_color' => ['nullable', 'string', 'max:7'],
-            'text_color' => ['nullable', 'string', 'max:7'],
-            'text_secondary_color' => ['nullable', 'string', 'max:7'],
-
-            // Card
-            'card_style' => ['nullable', 'in:solid,transparent,glass'],
-            'card_background_color' => ['nullable', 'string', 'max:50'],
-            'card_border_radius' => ['nullable', 'in:none,sm,md,lg,xl,2xl,full'],
-            'card_shadow' => ['nullable'],
-            'card_border_color' => ['nullable', 'string', 'max:50'],
-            'card_glow_enabled' => ['nullable'],
-            'card_glow_color' => ['nullable', 'string', 'max:7'],
-            'card_glow_color_secondary' => ['nullable', 'string', 'max:7'],
-            'card_glow_variant' => ['nullable', 'in:default,cyan,purple,rainbow,primary'],
-
-            // Typography
-            'font_family' => ['nullable', 'string', 'max:50'],
-            'font_size' => ['nullable', 'in:sm,base,lg'],
-
-            // Animations
-            'animation_entrance' => ['nullable', 'in:none,fade,slide-up,slide-down,scale,bounce'],
-            'animation_hover' => ['nullable', 'in:none,lift,glow,pulse,shake'],
-            'animation_delay' => ['nullable', 'integer', 'min:0', 'max:500'],
-
-            // Visual Effects
-            'show_particles' => ['nullable'],
-            'particles_style' => ['nullable', 'in:dots,lines,confetti,snow'],
-            'particles_color' => ['nullable', 'string', 'max:7'],
-
-            // Layout
-            'layout_style' => ['nullable', 'in:centered,left,compact'],
-            'show_profile_photo' => ['nullable'],
-            'photo_style' => ['nullable', 'in:circle,rounded,square'],
-            'photo_size' => ['nullable', 'in:sm,md,lg,xl'],
-
-            // Social
-            'social_style' => ['nullable', 'in:icons,buttons,pills'],
-            'social_size' => ['nullable', 'in:sm,md,lg'],
-            'social_colored' => ['nullable'],
-        ]);
-
-        // Convert string booleans to actual booleans (FormData sends as strings)
-        $booleanFields = ['card_shadow', 'card_glow_enabled', 'show_particles', 'show_profile_photo', 'social_colored'];
-        foreach ($booleanFields as $field) {
-            if (isset($validated[$field])) {
-                $validated[$field] = filter_var($validated[$field], FILTER_VALIDATE_BOOLEAN);
+        try {
+            // Ensure background_type has a default value if not present
+            if (!$request->has('background_type') || empty($request->input('background_type'))) {
+                $request->merge(['background_type' => 'solid']);
             }
-        }
 
-        if ($request->hasFile('background_image')) {
-            $settings = $profile->settings;
-            if ($settings && $settings->background_image) {
-                \Storage::disk('public')->delete($settings->background_image);
+            $validated = $request->validate([
+                // Background
+                'background_type' => ['required', 'in:solid,gradient,image'],
+                'background_color' => ['nullable', 'string', 'max:7'],
+                'background_gradient_start' => ['nullable', 'string', 'max:7'],
+                'background_gradient_end' => ['nullable', 'string', 'max:7'],
+                'background_gradient_direction' => ['nullable', 'in:to-b,to-r,to-br,to-bl'],
+                'background_image' => ['nullable', 'image', 'max:4096'],
+                'background_overlay_opacity' => ['nullable', 'integer', 'min:0', 'max:100'],
+                'background_pattern' => ['nullable', 'in:none,dots,grid,waves,noise'],
+                'background_pattern_opacity' => ['nullable', 'integer', 'min:0', 'max:100'],
+
+                // Colors
+                'primary_color' => ['nullable', 'string', 'max:7'],
+                'secondary_color' => ['nullable', 'string', 'max:7'],
+                'text_color' => ['nullable', 'string', 'max:7'],
+                'text_secondary_color' => ['nullable', 'string', 'max:7'],
+
+                // Card
+                'card_style' => ['nullable', 'in:solid,transparent,glass'],
+                'card_background_color' => ['nullable', 'string', 'max:50'],
+                'card_border_radius' => ['nullable', 'in:none,sm,md,lg,xl,2xl,full'],
+                'card_shadow' => ['nullable'],
+                'card_border_color' => ['nullable', 'string', 'max:50'],
+                'card_glow_enabled' => ['nullable'],
+                'card_glow_color' => ['nullable', 'string', 'max:7'],
+                'card_glow_color_secondary' => ['nullable', 'string', 'max:7'],
+                'card_glow_variant' => ['nullable', 'in:default,cyan,purple,rainbow,primary'],
+
+                // Typography
+                'font_family' => ['nullable', 'string', 'max:50'],
+                'font_size' => ['nullable', 'in:sm,base,lg'],
+
+                // Animations
+                'animation_entrance' => ['nullable', 'in:none,fade,slide-up,slide-down,scale,bounce'],
+                'animation_hover' => ['nullable', 'in:none,lift,glow,pulse,shake'],
+                'animation_delay' => ['nullable', 'integer', 'min:0', 'max:500'],
+
+                // Visual Effects
+                'show_particles' => ['nullable'],
+                'particles_style' => ['nullable', 'in:dots,lines,confetti,snow'],
+                'particles_color' => ['nullable', 'string', 'max:7'],
+
+                // Layout
+                'layout_style' => ['nullable', 'in:centered,left,compact'],
+                'show_profile_photo' => ['nullable'],
+                'photo_style' => ['nullable', 'in:circle,rounded,square'],
+                'photo_size' => ['nullable', 'in:sm,md,lg,xl'],
+
+                // Social
+                'social_style' => ['nullable', 'in:icons,buttons,pills'],
+                'social_size' => ['nullable', 'in:sm,md,lg'],
+                'social_colored' => ['nullable'],
+            ]);
+
+            // Convert string booleans to actual booleans (FormData sends as strings)
+            $booleanFields = ['card_shadow', 'card_glow_enabled', 'show_particles', 'show_profile_photo', 'social_colored'];
+            foreach ($booleanFields as $field) {
+                if (isset($validated[$field])) {
+                    $validated[$field] = filter_var($validated[$field], FILTER_VALIDATE_BOOLEAN);
+                }
             }
-            $validated['background_image'] = $request->file('background_image')->store('backgrounds', 'public');
-        }
 
-        // Build update data, only including non-null values but keeping false booleans
-        $updateData = [];
-        foreach ($validated as $key => $value) {
-            // Skip null values and empty strings, but keep false booleans and '0' values
-            if ($value !== null && $value !== '') {
-                $updateData[$key] = $value;
-            } elseif (in_array($key, $booleanFields) && $value === false) {
-                $updateData[$key] = false;
+            if ($request->hasFile('background_image')) {
+                $settings = $profile->settings;
+                if ($settings && $settings->background_image) {
+                    \Storage::disk('public')->delete($settings->background_image);
+                }
+                $validated['background_image'] = $request->file('background_image')->store('backgrounds', 'public');
             }
-        }
-        
-        $profile->settings()->updateOrCreate(
-            ['profile_id' => $profile->id],
-            $updateData
-        );
 
-        return redirect()->back()->with('success', '¡Configuración guardada!');
+            // Build update data, only including non-null values but keeping false booleans
+            $updateData = [];
+            foreach ($validated as $key => $value) {
+                // Skip null values and empty strings, but keep false booleans and '0' values
+                if ($value !== null && $value !== '') {
+                    $updateData[$key] = $value;
+                } elseif (in_array($key, $booleanFields) && $value === false) {
+                    $updateData[$key] = false;
+                }
+            }
+            
+            // Ensure profile_id is set for updateOrCreate
+            $updateData['profile_id'] = $profile->id;
+            
+            $profile->settings()->updateOrCreate(
+                ['profile_id' => $profile->id],
+                $updateData
+            );
+
+            return back()->with('success', '¡Diseño guardado!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Settings validation failed', [
+                'errors' => $e->errors(),
+                'profile_id' => $profile->id,
+            ]);
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            \Log::error('Error updating profile settings', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'profile_id' => $profile->id,
+                'user_id' => $request->user()?->id,
+                'exception' => get_class($e),
+            ]);
+
+            return back()->with('error', 'Error al guardar');
+        }
     }
     
     // Note: Validation exceptions are handled by the exception handler in bootstrap/app.php
