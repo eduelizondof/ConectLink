@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { Download, Eye } from 'lucide-vue-next';
 import type { Profile, Organization, ProfileSettings, Product, Category, ProductSection } from '@/types/profile';
 import { getDefaultSettings, getGradientDirection } from '@/composables/useProfileSettings';
+import { useProfileHelpers } from '@/composables/useProfileHelpers';
 import ProfileHeader from '@/components/profile/ProfileHeader.vue';
 import SocialLinks from '@/components/profile/SocialLinks.vue';
 import CustomLinks from '@/components/profile/CustomLinks.vue';
@@ -34,6 +35,9 @@ const props = defineProps<{
     organization: OrganizationPreviewProps;
 }>();
 
+// Get helper functions
+const { getBrandColor } = useProfileHelpers();
+
 // Log organization data to debug structure
 console.log('ProfilePreview - Organization data:', {
     organization: props.organization,
@@ -49,6 +53,7 @@ console.log('ProfilePreview - Organization data:', {
 });
 
 // Merge settings with defaults - MUST be computed for reactivity
+// Use the same approach as ProfilePage but ensure all settings are properly merged
 const normalizedSettings = computed<ProfileSettings>(() => {
     const defaults = getDefaultSettings();
     const profileSettings = props.profile.settings || {};
@@ -80,7 +85,7 @@ const normalizedSettings = computed<ProfileSettings>(() => {
     };
 });
 
-// Create reactive backgroundStyle that watches normalizedSettings
+// Create reactive backgroundStyle that watches normalizedSettings - same logic as ProfilePage
 const backgroundStyle = computed(() => {
     const s = normalizedSettings.value;
     if (s.background_type === 'gradient' && s.background_gradient_start && s.background_gradient_end) {
@@ -131,7 +136,7 @@ const normalizedProfile = computed<Profile>(() => {
             url: link.url,
             label: link.label || link.display_label || link.platform,
             icon: link.icon,
-            brand_color: link.brand_color || '#3b82f6',
+            brand_color: link.brand_color || getBrandColor(link.platform),
         })),
         custom_links: normalizedCustomLinks.map((link: any) => ({
             id: link.id,
@@ -344,7 +349,7 @@ const isLoaded = computed(() => true);
         <!-- Content -->
         <div
             class="relative pt-6 overflow-y-auto z-10"
-            :style="[backgroundStyle, { minHeight: '500px', maxHeight: '600px' }]"
+            :style="{ ...backgroundStyle, minHeight: '500px', maxHeight: '600px' }"
         >
             <div class="px-4 py-6">
                 <!-- Profile Header -->
