@@ -58,7 +58,20 @@ const normalizedSettings = computed<ProfileSettings>(() => {
     const defaults = getDefaultSettings();
     const profileSettings = props.profile.settings || {};
     
-    return {
+    // DEBUG: Log raw profile settings
+    console.log('🔍 [ProfilePreview] Raw profile settings:', {
+        profile_settings: profileSettings,
+        card_shadow_raw: profileSettings.card_shadow,
+        card_shadow_type: typeof profileSettings.card_shadow,
+        card_glow_enabled_raw: profileSettings.card_glow_enabled,
+        card_glow_enabled_type: typeof profileSettings.card_glow_enabled,
+        card_glow_duration_raw: profileSettings.card_glow_duration,
+        card_glow_duration_type: typeof profileSettings.card_glow_duration,
+        card_glow_opacity_raw: profileSettings.card_glow_opacity,
+        card_glow_opacity_type: typeof profileSettings.card_glow_opacity,
+    });
+    
+    const result = {
         ...defaults,
         ...profileSettings,
         // Ensure required settings are present
@@ -82,8 +95,9 @@ const normalizedSettings = computed<ProfileSettings>(() => {
         card_glow_color: profileSettings.card_glow_color || defaults.card_glow_color,
         card_glow_color_secondary: profileSettings.card_glow_color_secondary || defaults.card_glow_color_secondary,
         card_glow_variant: profileSettings.card_glow_variant || defaults.card_glow_variant,
-        card_glow_duration: profileSettings.card_glow_duration ?? defaults.card_glow_duration,
-        card_glow_opacity: profileSettings.card_glow_opacity ?? defaults.card_glow_opacity,
+        // Convert to number, handling both number and string types from DB
+        card_glow_duration: profileSettings.card_glow_duration !== undefined ? Number(profileSettings.card_glow_duration) : defaults.card_glow_duration,
+        card_glow_opacity: profileSettings.card_glow_opacity !== undefined ? Number(profileSettings.card_glow_opacity) : defaults.card_glow_opacity,
         photo_style: profileSettings.photo_style || defaults.photo_style,
         photo_size: profileSettings.photo_size || 'md', // Smaller for preview
         social_style: profileSettings.social_style || defaults.social_style,
@@ -91,6 +105,20 @@ const normalizedSettings = computed<ProfileSettings>(() => {
         social_colored: profileSettings.social_colored ?? defaults.social_colored,
         show_profile_photo: profileSettings.show_profile_photo ?? defaults.show_profile_photo,
     };
+    
+    // DEBUG: Log normalized result
+    console.log('✅ [ProfilePreview] Normalized settings:', {
+        card_shadow: result.card_shadow,
+        card_shadow_type: typeof result.card_shadow,
+        card_glow_enabled: result.card_glow_enabled,
+        card_glow_enabled_type: typeof result.card_glow_enabled,
+        card_glow_duration: result.card_glow_duration,
+        card_glow_duration_type: typeof result.card_glow_duration,
+        card_glow_opacity: result.card_glow_opacity,
+        card_glow_opacity_type: typeof result.card_glow_opacity,
+    });
+    
+    return result;
 });
 
 // Use the same composable as ProfilePage for consistency - now accepts computed

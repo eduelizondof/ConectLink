@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Profile;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ProfileDesignController extends Controller
@@ -143,6 +144,19 @@ class ProfileDesignController extends Controller
     {
         $this->authorize('update', $profile->organization);
 
+        // DEBUG: Log incoming request data
+        \Log::info('🔍 [ProfileDesignController] Incoming card settings request:', [
+            'card_shadow_raw' => $request->input('card_shadow'),
+            'card_shadow_type' => gettype($request->input('card_shadow')),
+            'card_glow_enabled_raw' => $request->input('card_glow_enabled'),
+            'card_glow_enabled_type' => gettype($request->input('card_glow_enabled')),
+            'card_glow_duration_raw' => $request->input('card_glow_duration'),
+            'card_glow_duration_type' => gettype($request->input('card_glow_duration')),
+            'card_glow_opacity_raw' => $request->input('card_glow_opacity'),
+            'card_glow_opacity_type' => gettype($request->input('card_glow_opacity')),
+            'all_request_data' => $request->all(),
+        ]);
+
         $validated = $request->validate([
             'card_style' => ['required', 'in:solid,transparent,glass'],
             'card_background_color' => ['nullable', 'string', 'max:50'],
@@ -157,15 +171,51 @@ class ProfileDesignController extends Controller
             'card_glow_opacity' => ['nullable', 'numeric', 'min:0', 'max:1'],
         ]);
 
-        // Convert booleans
-        $validated['card_shadow'] = filter_var($validated['card_shadow'] ?? false, FILTER_VALIDATE_BOOLEAN);
-        $validated['card_glow_enabled'] = filter_var($validated['card_glow_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        // Convert booleans - handle both boolean and string values
+        // filter_var with FILTER_VALIDATE_BOOLEAN converts "false" string to false, "true" to true
+        // But we need to ensure we always get a boolean, even if the field is missing
+        $validated['card_shadow'] = isset($validated['card_shadow']) 
+            ? filter_var($validated['card_shadow'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false
+            : false;
+        $validated['card_glow_enabled'] = isset($validated['card_glow_enabled'])
+            ? filter_var($validated['card_glow_enabled'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false
+            : false;
 
         // Set defaults for glow customization if not provided
-        $validated['card_glow_duration'] = $validated['card_glow_duration'] ?? 6;
-        $validated['card_glow_opacity'] = $validated['card_glow_opacity'] ?? 1.0;
+        $validated['card_glow_duration'] = isset($validated['card_glow_duration']) 
+            ? (int) $validated['card_glow_duration'] 
+            : 6;
+        $validated['card_glow_opacity'] = isset($validated['card_glow_opacity'])
+            ? (float) $validated['card_glow_opacity']
+            : 1.0;
+
+        // DEBUG: Log validated data before saving
+        \Log::info('✅ [ProfileDesignController] Validated card settings before save:', [
+            'card_shadow' => $validated['card_shadow'],
+            'card_shadow_type' => gettype($validated['card_shadow']),
+            'card_glow_enabled' => $validated['card_glow_enabled'],
+            'card_glow_enabled_type' => gettype($validated['card_glow_enabled']),
+            'card_glow_duration' => $validated['card_glow_duration'],
+            'card_glow_duration_type' => gettype($validated['card_glow_duration']),
+            'card_glow_opacity' => $validated['card_glow_opacity'],
+            'card_glow_opacity_type' => gettype($validated['card_glow_opacity']),
+            'all_validated' => $validated,
+        ]);
 
         $this->updateProfileSettings($profile, $validated);
+        
+        // DEBUG: Log saved settings
+        $savedSettings = $profile->fresh()->settings;
+        \Log::info('💾 [ProfileDesignController] Saved card settings:', [
+            'card_shadow' => $savedSettings->card_shadow ?? null,
+            'card_shadow_type' => $savedSettings->card_shadow !== null ? gettype($savedSettings->card_shadow) : 'null',
+            'card_glow_enabled' => $savedSettings->card_glow_enabled ?? null,
+            'card_glow_enabled_type' => $savedSettings->card_glow_enabled !== null ? gettype($savedSettings->card_glow_enabled) : 'null',
+            'card_glow_duration' => $savedSettings->card_glow_duration ?? null,
+            'card_glow_duration_type' => $savedSettings->card_glow_duration !== null ? gettype($savedSettings->card_glow_duration) : 'null',
+            'card_glow_opacity' => $savedSettings->card_glow_opacity ?? null,
+            'card_glow_opacity_type' => $savedSettings->card_glow_opacity !== null ? gettype($savedSettings->card_glow_opacity) : 'null',
+        ]);
 
         return back()->with('success', '¡Tarjetas actualizadas!');
     }

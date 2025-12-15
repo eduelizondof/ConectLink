@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue';
+import { computed, watch, nextTick } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { useSwal } from '@/composables/useSwal';
 import { Save, Loader2, Sparkles, Info } from 'lucide-vue-next';
@@ -49,20 +49,69 @@ const form = useForm({
 watch(() => props.profile, (profile) => {
     if (profile?.settings) {
         const s = profile.settings;
+        
+        // DEBUG: Log raw settings data
+        console.log('🔍 [DesignCardsSection] Loading settings from profile:', {
+            raw_settings: s,
+            card_shadow_raw: s.card_shadow,
+            card_shadow_type: typeof s.card_shadow,
+            card_shadow_value: s.card_shadow,
+            card_glow_enabled_raw: s.card_glow_enabled,
+            card_glow_enabled_type: typeof s.card_glow_enabled,
+            card_glow_enabled_value: s.card_glow_enabled,
+            card_glow_duration_raw: s.card_glow_duration,
+            card_glow_duration_type: typeof s.card_glow_duration,
+            card_glow_opacity_raw: s.card_glow_opacity,
+            card_glow_opacity_type: typeof s.card_glow_opacity,
+        });
+        
+        // Process and set form values - ensure explicit boolean conversion
+        // Convert to strict boolean: true/false, not truthy/falsy
+        const cardShadowValue = s.card_shadow === true || s.card_shadow === 1 || s.card_shadow === '1' || s.card_shadow === 'true';
+        const cardGlowEnabledValue = s.card_glow_enabled === true || s.card_glow_enabled === 1 || s.card_glow_enabled === '1' || s.card_glow_enabled === 'true';
+        
         form.card_style = s.card_style || 'solid';
         form.card_background_color = s.card_background_color || '#ffffff';
         form.card_border_radius = s.card_border_radius || 'lg';
-        // Ensure boolean values are properly set
-        form.card_shadow = s.card_shadow !== undefined ? Boolean(s.card_shadow) : true;
+        // Ensure boolean values are properly set - use explicit boolean assignment
+        form.card_shadow = cardShadowValue;
         form.card_border_color = s.card_border_color || '';
-        form.card_glow_enabled = s.card_glow_enabled !== undefined ? Boolean(s.card_glow_enabled) : false;
+        form.card_glow_enabled = cardGlowEnabledValue;
         form.card_glow_color = s.card_glow_color || '#3b82f6';
         form.card_glow_color_secondary = s.card_glow_color_secondary || '#8b5cf6';
         form.card_glow_variant = s.card_glow_variant || 'primary';
-        form.card_glow_duration = s.card_glow_duration ?? 6;
-        form.card_glow_opacity = s.card_glow_opacity ?? 1.0;
+        // Convert to number, handling both number and string types
+        form.card_glow_duration = s.card_glow_duration !== undefined ? Number(s.card_glow_duration) : 6;
+        form.card_glow_opacity = s.card_glow_opacity !== undefined ? Number(s.card_glow_opacity) : 1.0;
+        
+        // DEBUG: Log processed form values
+        console.log('✅ [DesignCardsSection] Form values after processing:', {
+            card_shadow: form.card_shadow,
+            card_shadow_type: typeof form.card_shadow,
+            card_shadow_value: form.card_shadow,
+            card_glow_enabled: form.card_glow_enabled,
+            card_glow_enabled_type: typeof form.card_glow_enabled,
+            card_glow_enabled_value: form.card_glow_enabled,
+            card_glow_duration: form.card_glow_duration,
+            card_glow_duration_type: typeof form.card_glow_duration,
+            card_glow_opacity: form.card_glow_opacity,
+            card_glow_opacity_type: typeof form.card_glow_opacity,
+            form_data: form.data(),
+        });
+        
+        // Force reactivity by using nextTick to ensure DOM is updated
+        nextTick(() => {
+            console.log('🔄 [DesignCardsSection] Form values after nextTick:', {
+                card_shadow: form.card_shadow,
+                card_shadow_type: typeof form.card_shadow,
+                card_glow_enabled: form.card_glow_enabled,
+                card_glow_enabled_type: typeof form.card_glow_enabled,
+            });
+        });
+    } else {
+        console.log('⚠️ [DesignCardsSection] No settings found in profile:', profile);
     }
-}, { immediate: true });
+}, { immediate: true, flush: 'post' });
 
 // Options
 const cardStyles = [
@@ -92,19 +141,20 @@ const glowVariants = [
 function save() {
     if (!props.profile) return;
 
-    // Ensure boolean values are properly sent
-    const data = {
+    // Ensure boolean values are properly sent as actual booleans
+    // Ensure numeric values are properly converted
+    const data: Record<string, any> = {
         card_style: form.card_style,
         card_background_color: form.card_background_color,
         card_border_radius: form.card_border_radius,
-        card_shadow: form.card_shadow,
+        card_shadow: !!form.card_shadow, // Convert to explicit boolean
         card_border_color: form.card_border_color || '',
-        card_glow_enabled: form.card_glow_enabled,
+        card_glow_enabled: !!form.card_glow_enabled, // Convert to explicit boolean - ensures false is sent
         card_glow_color: form.card_glow_color,
         card_glow_color_secondary: form.card_glow_color_secondary,
         card_glow_variant: form.card_glow_variant,
-        card_glow_duration: form.card_glow_duration,
-        card_glow_opacity: form.card_glow_opacity,
+        card_glow_duration: Number(form.card_glow_duration) || 6,
+        card_glow_opacity: Number(form.card_glow_opacity) || 1.0,
     };
 
     form.transform(() => data).put(`/admin/profiles/${props.profile.id}/design/cards`, {
@@ -209,8 +259,7 @@ defineExpose({
         <div class="flex items-center justify-between rounded-lg border p-3">
             <div class="flex items-center gap-2">
                 <Checkbox
-                    :checked="form.card_shadow"
-                    @update:checked="form.card_shadow = $event"
+                    v-model="form.card_shadow"
                     id="card_shadow"
                 />
                 <div class="flex items-center gap-2">
@@ -228,12 +277,11 @@ defineExpose({
         <!-- Glow Effect -->
         <div class="space-y-4 rounded-lg border bg-muted/50 p-4">
             <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <Checkbox
-                        :checked="form.card_glow_enabled"
-                        @update:checked="form.card_glow_enabled = $event"
-                        id="card_glow_enabled"
-                    />
+                    <div class="flex items-center gap-2">
+                        <Checkbox
+                            v-model="form.card_glow_enabled"
+                            id="card_glow_enabled"
+                        />
                     <div class="flex items-center gap-2">
                         <Sparkles class="h-4 w-4 text-amber-500" />
                         <Label for="card_glow_enabled" class="cursor-pointer">Efecto de brillo</Label>

@@ -114,6 +114,25 @@ class OrganizationController extends Controller
 
         $limits = $request->user()->getLimits();
 
+        // DEBUG: Log settings being sent to frontend
+        foreach ($organization->profiles as $profile) {
+            if ($profile->settings) {
+                Log::info('🔍 [OrganizationController] Profile settings being sent to frontend:', [
+                    'profile_id' => $profile->id,
+                    'profile_name' => $profile->name,
+                    'card_shadow' => $profile->settings->card_shadow,
+                    'card_shadow_type' => gettype($profile->settings->card_shadow),
+                    'card_glow_enabled' => $profile->settings->card_glow_enabled,
+                    'card_glow_enabled_type' => gettype($profile->settings->card_glow_enabled),
+                    'card_glow_duration' => $profile->settings->card_glow_duration,
+                    'card_glow_duration_type' => gettype($profile->settings->card_glow_duration),
+                    'card_glow_opacity' => $profile->settings->card_glow_opacity,
+                    'card_glow_opacity_type' => gettype($profile->settings->card_glow_opacity),
+                    'settings_array' => $profile->settings->toArray(),
+                ]);
+            }
+        }
+
         return Inertia::render('Admin/Organizations/Edit', [
             'organization' => $organization,
             'limits' => [

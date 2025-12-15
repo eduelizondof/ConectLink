@@ -204,15 +204,47 @@ export function useProfileSettings(profileSettings?: MaybeRefOrGetter<ProfileSet
         return radiusMap[settings.value.card_border_radius] || '0.5rem';
     });
 
-    const glowSettings = computed(() => ({
-        enabled: settings.value.card_glow_enabled ?? false,
-        color: settings.value.card_glow_color || settings.value.primary_color,
-        colorSecondary: settings.value.card_glow_color_secondary || settings.value.secondary_color,
-        variant: settings.value.card_glow_variant || 'primary',
-        borderRadius: cardBorderRadiusValue.value,
-        duration: settings.value.card_glow_duration ?? 6,
-        opacity: settings.value.card_glow_opacity ?? 1.0,
-    }));
+    const glowSettings = computed(() => {
+        const s = settings.value;
+        
+        // DEBUG: Log settings being processed
+        console.log('🔍 [useProfileSettings] Processing glow settings:', {
+            card_glow_enabled_raw: s.card_glow_enabled,
+            card_glow_enabled_type: typeof s.card_glow_enabled,
+            card_glow_enabled_value: s.card_glow_enabled,
+            card_shadow_raw: s.card_shadow,
+            card_shadow_type: typeof s.card_shadow,
+            card_shadow_value: s.card_shadow,
+            card_glow_duration_raw: s.card_glow_duration,
+            card_glow_duration_type: typeof s.card_glow_duration,
+            card_glow_opacity_raw: s.card_glow_opacity,
+            card_glow_opacity_type: typeof s.card_glow_opacity,
+            full_settings: s,
+        });
+        
+        const result = {
+            enabled: s.card_glow_enabled ?? false,
+            color: s.card_glow_color || s.primary_color,
+            colorSecondary: s.card_glow_color_secondary || s.secondary_color,
+            variant: s.card_glow_variant || 'primary',
+            borderRadius: cardBorderRadiusValue.value,
+            // Convert to number, handling both number and string types from DB
+            duration: s.card_glow_duration !== undefined ? Number(s.card_glow_duration) : 6,
+            opacity: s.card_glow_opacity !== undefined ? Number(s.card_glow_opacity) : 1.0,
+        };
+        
+        // DEBUG: Log processed result
+        console.log('✅ [useProfileSettings] Glow settings result:', {
+            enabled: result.enabled,
+            enabled_type: typeof result.enabled,
+            duration: result.duration,
+            duration_type: typeof result.duration,
+            opacity: result.opacity,
+            opacity_type: typeof result.opacity,
+        });
+        
+        return result;
+    });
 
     return {
         settings,
