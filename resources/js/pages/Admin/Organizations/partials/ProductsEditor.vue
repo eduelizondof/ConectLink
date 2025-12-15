@@ -52,14 +52,6 @@ const activeTab = ref('products');
 // Inertia may serialize relationships in snake_case (product_sections) or camelCase (productSections)
 const productSections = computed(() => {
     const sections = props.organization?.productSections || props.organization?.product_sections;
-    console.log('productSections computed:', {
-        organization: props.organization,
-        productSections: props.organization?.productSections,
-        product_sections: props.organization?.product_sections,
-        sections: sections,
-        isArray: Array.isArray(sections),
-        type: typeof sections,
-    });
     if (!sections) return [];
     return Array.isArray(sections) ? sections : [];
 });
@@ -547,12 +539,6 @@ function toggleSectionForProduct(sectionId: number) {
                         Las secciones te permiten agrupar productos con un título personalizable.
                         Por ejemplo: "Lo más preguntado", "Mis productos", "Ofertas especiales".
                     </p>
-
-                    <!-- Debug info (temporary) -->
-                    <div class="text-xs text-muted-foreground p-2 bg-muted rounded">
-                        <p>Debug: productSections.length = {{ productSections.length }}</p>
-                        <p>Debug: organization.productSections = {{ JSON.stringify(organization?.productSections) }}</p>
-                    </div>
 
                     <!-- Sections List -->
                     <div v-if="productSections.length > 0" class="space-y-4">

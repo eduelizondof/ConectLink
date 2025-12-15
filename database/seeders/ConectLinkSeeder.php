@@ -7,6 +7,7 @@ use App\Models\FloatingAlert;
 use App\Models\Organization;
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Models\ProductSection;
 use App\Models\Profile;
 use App\Models\ProfileSetting;
 use App\Models\SocialLink;
@@ -54,16 +55,18 @@ class ConectLinkSeeder extends Seeder
             ]
         );
 
-        // Create organization
-        $organization = Organization::create([
-            'user_id' => $owner->id,
-            'name' => 'Dubacano',
-            'slug' => 'dubacano',
-            'type' => 'business',
-            'description' => 'Frutas frescas de la mejor calidad. Peras, duraznos, uvas y manzanas directamente del campo a tu mesa.',
-            'is_active' => true,
-            'is_verified' => true,
-        ]);
+        // Create organization for Dubacano
+        $organization = Organization::firstOrCreate(
+            ['slug' => 'dubacano'],
+            [
+                'user_id' => $owner->id,
+                'name' => 'Dubacano',
+                'type' => 'business',
+                'description' => 'Frutas frescas de la mejor calidad. Peras, duraznos, uvas y manzanas directamente del campo a tu mesa.',
+                'is_active' => true,
+                'is_verified' => true,
+            ]
+        );
 
         // Create product category
         $categoryFrutas = ProductCategory::create([
@@ -122,8 +125,9 @@ class ConectLinkSeeder extends Seeder
             ],
         ];
 
+        $createdProducts = [];
         foreach ($products as $index => $productData) {
-            Product::create([
+            $createdProducts[] = Product::create([
                 'organization_id' => $organization->id,
                 'category_id' => $categoryFrutas->id,
                 'sort_order' => $index + 1,
@@ -133,20 +137,78 @@ class ConectLinkSeeder extends Seeder
             ]);
         }
 
+        // Create product sections
+        $productSections = [
+            [
+                'title' => 'Frutas Destacadas',
+                'slug' => 'frutas-destacadas',
+                'description' => 'Nuestras frutas más populares y mejor calificadas',
+                'icon' => 'star',
+                'sort_order' => 1,
+            ],
+            [
+                'title' => 'Ofertas Especiales',
+                'slug' => 'ofertas-especiales',
+                'description' => 'Productos con descuentos y promociones especiales',
+                'icon' => 'tag',
+                'sort_order' => 2,
+            ],
+            [
+                'title' => 'Temporada',
+                'slug' => 'temporada',
+                'description' => 'Frutas frescas de temporada',
+                'icon' => 'calendar',
+                'sort_order' => 3,
+            ],
+        ];
+
+        $createdSections = [];
+        foreach ($productSections as $sectionData) {
+            $createdSections[] = ProductSection::create([
+                'organization_id' => $organization->id,
+                'is_active' => true,
+                ...$sectionData,
+            ]);
+        }
+
+        // Assign products to sections
+        // Frutas Destacadas: Peras, Duraznos, Manzanas (featured products)
+        $createdSections[0]->products()->attach([
+            $createdProducts[0]->id => ['sort_order' => 1], // Peras
+            $createdProducts[1]->id => ['sort_order' => 2], // Duraznos
+            $createdProducts[3]->id => ['sort_order' => 3], // Manzanas
+        ]);
+
+        // Ofertas Especiales: Peras (on sale), Uvas (on sale)
+        $createdSections[1]->products()->attach([
+            $createdProducts[0]->id => ['sort_order' => 1], // Peras (on sale)
+            $createdProducts[2]->id => ['sort_order' => 2], // Uvas (on sale)
+        ]);
+
+        // Temporada: Duraznos, Uvas
+        $createdSections[2]->products()->attach([
+            $createdProducts[1]->id => ['sort_order' => 1], // Duraznos
+            $createdProducts[2]->id => ['sort_order' => 2], // Uvas
+        ]);
+
         // =========================================
         // PRIMARY PROFILE (Organization/Company)
         // =========================================
-        $primaryProfile = Profile::create([
-            'organization_id' => $organization->id,
-            'user_id' => $owner->id,
-            'name' => 'Dubacano',
-            'slug' => null, // Primary profile has no slug
-            'job_title' => 'Distribuidora de Frutas',
-            'slogan' => '🍎 Del campo a tu mesa, frescura garantizada 🍐',
-            'bio' => 'Somos una empresa familiar dedicada a la distribución de frutas frescas de la mejor calidad. Con más de 15 años de experiencia, llevamos la frescura del campo directamente a tu hogar o negocio.',
-            'is_primary' => true,
-            'is_active' => true,
-        ]);
+        $primaryProfile = Profile::firstOrCreate(
+            [
+                'organization_id' => $organization->id,
+                'is_primary' => true,
+            ],
+            [
+                'user_id' => $owner->id,
+                'name' => 'Dubacano',
+                'slug' => null, // Primary profile has no slug
+                'job_title' => 'Distribuidora de Frutas',
+                'slogan' => '🍎 Del campo a tu mesa, frescura garantizada 🍐',
+                'bio' => 'Somos una empresa familiar dedicada a la distribución de frutas frescas de la mejor calidad. Con más de 15 años de experiencia, llevamos la frescura del campo directamente a tu hogar o negocio.',
+                'is_active' => true,
+            ]
+        );
 
         // Primary profile settings - Vibrant fruit theme with visual effects
         ProfileSetting::updateOrCreate(
@@ -203,7 +265,7 @@ class ConectLinkSeeder extends Seeder
             ]);
         }
 
-        // Primary profile custom links
+        // Primary profile custom links with image customizations
         $primaryCustomLinks = [
             [
                 'title' => '📦 Catálogo de Productos',
@@ -211,6 +273,9 @@ class ConectLinkSeeder extends Seeder
                 'description' => 'Conoce nuestra selección de frutas frescas',
                 'icon' => 'package',
                 'is_highlighted' => true,
+                'image' => 'custom-links/zHaGFDWaY0G9iNGkyHreIwoebhcBhnkGaZNT8Y10.jpg',
+                'image_position' => 'top',
+                'image_shape' => 'square',
                 'sort_order' => 1,
             ],
             [
@@ -220,6 +285,9 @@ class ConectLinkSeeder extends Seeder
                 'icon' => 'truck',
                 'button_color' => '#16a34a',
                 'text_color' => '#ffffff',
+                'image' => 'custom-links/1ku0PiOqXskldOdZ9UnBwxuV1YH272C71HWM2ndr.jpg',
+                'image_position' => 'right',
+                'image_shape' => 'circle',
                 'sort_order' => 2,
             ],
             [
@@ -227,6 +295,7 @@ class ConectLinkSeeder extends Seeder
                 'url' => 'https://wa.me/5218111234567?text=Hola,%20me%20interesa%20comprar%20al%20mayoreo',
                 'description' => 'Precios especiales para restaurantes y comercios',
                 'icon' => 'briefcase',
+                'thumbnail' => 'thumbnails/mayoreo-thumb.jpg',
                 'sort_order' => 3,
             ],
             [
@@ -234,6 +303,8 @@ class ConectLinkSeeder extends Seeder
                 'url' => 'https://maps.google.com/?q=Monterrey,NL',
                 'description' => 'Visítanos en Monterrey, N.L.',
                 'icon' => 'map-pin',
+                'image_position' => 'left',
+                'image_shape' => 'square',
                 'sort_order' => 4,
             ],
         ];
@@ -550,47 +621,243 @@ class ConectLinkSeeder extends Seeder
         ]);
 
         // =========================================
+        // PERSONAL PROFILE - SAAMTHY (Influencer)
+        // =========================================
+        $saamthy = User::firstOrCreate(
+            ['email' => 'saamthy@cnva.mx'],
+            [
+                'name' => 'Samanta',
+                'password' => bcrypt('password'),
+                'email_verified_at' => now(),
+            ]
+        );
+
+        // Create personal organization for Saamthy
+        $saamthyOrganization = Organization::firstOrCreate(
+            ['slug' => 'saamthy'],
+            [
+                'user_id' => $saamthy->id,
+                'name' => 'Saamthy',
+                'type' => 'personal',
+                'description' => 'Creadora de contenido enfocada en moda, tendencias y contenido estético para TikTok e Instagram.',
+                'is_active' => true,
+                'is_verified' => true,
+            ]
+        );
+
+        // Create primary profile for personal organization
+        $saamthyProfile = Profile::firstOrCreate(
+            [
+                'organization_id' => $saamthyOrganization->id,
+                'is_primary' => true,
+            ],
+            [
+                'user_id' => $saamthy->id,
+                'name' => 'Saamthy',
+                'slug' => null, // Primary profile has no slug
+                'job_title' => 'Creadora de Contenido',
+                'slogan' => 'Moda, tendencias y contenido estético ✨',
+                'bio' => 'Soy creadora de contenido y estudio Diseño de Modas. Me enfoco en moda, tendencias y contenido estético para TikTok e Instagram. Me gusta hacer lipsyncs, outfits, baile y videos con vibra juvenil, fresca y real. Mi objetivo es conectar con la gente a través de estilo, autenticidad y una estética que se siente natural y cercana.',
+                'is_active' => true,
+            ]
+        );
+
+        // Saamthy profile settings - Modern, aesthetic theme
+        ProfileSetting::updateOrCreate(
+            ['profile_id' => $saamthyProfile->id],
+            [
+                'background_type' => 'gradient',
+                'background_color' => '#ffffff',
+                'background_gradient_start' => '#fce7f3',
+                'background_gradient_end' => '#fdf2f8',
+                'background_gradient_direction' => 'to-br',
+                'background_pattern' => 'dots',
+                'background_pattern_opacity' => 10,
+                'primary_color' => '#ec4899',
+                'secondary_color' => '#f472b6',
+                'text_color' => '#1f2937',
+                'text_secondary_color' => '#6b7280',
+                'card_style' => 'glass',
+                'card_background_color' => 'rgba(255, 255, 255, 0.9)',
+                'card_border_radius' => 'xl',
+                'card_shadow' => true,
+                'card_glow_enabled' => true,
+                'card_glow_variant' => 'purple',
+                'font_family' => 'Inter',
+                'animation_entrance' => 'fade',
+                'animation_hover' => 'lift',
+                'animation_delay' => 100,
+                'show_particles' => true,
+                'particles_style' => 'dots',
+                'layout_style' => 'centered',
+                'show_profile_photo' => true,
+                'photo_style' => 'circle',
+                'photo_size' => 'xl',
+                'social_style' => 'pills',
+                'social_size' => 'md',
+                'social_colored' => true,
+            ]
+        );
+
+        // Saamthy social links
+        $saamthySocialLinks = [
+            ['platform' => 'instagram', 'url' => 'https://www.instagram.com/saamthy/', 'sort_order' => 1],
+            ['platform' => 'tiktok', 'url' => 'https://www.tiktok.com/@saaminion', 'sort_order' => 2],
+            ['platform' => 'email', 'url' => 'mailto:saamthy@cnva.mx', 'sort_order' => 3],
+        ];
+
+        foreach ($saamthySocialLinks as $linkData) {
+            SocialLink::create([
+                'profile_id' => $saamthyProfile->id,
+                'is_active' => true,
+                ...$linkData,
+            ]);
+        }
+
+        // Saamthy custom links
+        $saamthyCustomLinks = [
+            [
+                'title' => '📸 Instagram',
+                'url' => 'https://www.instagram.com/saamthy/',
+                'description' => 'Sígueme para contenido de moda y estilo',
+                'icon' => 'instagram',
+                'is_highlighted' => true,
+                'button_color' => '#ec4899',
+                'text_color' => '#ffffff',
+                'sort_order' => 1,
+            ],
+            [
+                'title' => '🎵 TikTok',
+                'url' => 'https://www.tiktok.com/@saaminion',
+                'description' => 'Lipsyncs, outfits y contenido fresco',
+                'icon' => 'music',
+                'button_color' => '#000000',
+                'text_color' => '#ffffff',
+                'sort_order' => 2,
+            ],
+            [
+                'title' => '💌 Colaboraciones',
+                'url' => 'mailto:samthy.contacto@gmail.com?subject=Colaboración',
+                'description' => 'Para marcas y colaboraciones',
+                'icon' => 'mail',
+                'sort_order' => 3,
+            ],
+        ];
+
+        foreach ($saamthyCustomLinks as $linkData) {
+            CustomLink::create([
+                'profile_id' => $saamthyProfile->id,
+                'is_active' => true,
+                ...$linkData,
+            ]);
+        }
+
+        // Saamthy vCard
+        VcardSetting::create([
+            'profile_id' => $saamthyProfile->id,
+            'first_name' => 'Samanta',
+            'last_name' => '',
+            'job_title' => 'Creadora de Contenido',
+            'email' => 'saamthy@cnva.mx',
+            'email_work' => 'samthy.contacto@gmail.com',
+            'website' => 'https://conectlink.cnva.mx/saamthy',
+            'notes' => 'Creadora de contenido enfocada en moda, tendencias y contenido estético para TikTok e Instagram.',
+            'is_active' => true,
+            'include_photo' => true,
+        ]);
+
+        // =========================================
         // SUBSCRIPTIONS - Annual plans for all users
         // =========================================
         $empresarialPlan = SubscriptionPlan::where('slug', 'empresarial')->first();
 
         if ($empresarialPlan) {
-            $users = [$owner, $vendedor, $ceo];
+            // Ensure Dubacano owner and Saamthy have active subscriptions
+            $mainUsers = [
+                ['user' => $owner, 'name' => 'Dubacano'],
+                ['user' => $saamthy, 'name' => 'Saamthy'],
+            ];
 
-            foreach ($users as $user) {
-                Subscription::updateOrCreate(
-                    ['user_id' => $user->id],
-                    [
+            foreach ($mainUsers as $userData) {
+                $user = $userData['user'];
+                $userName = $userData['name'];
+                
+                // Check if user already has an active subscription
+                $activeSubscription = Subscription::where('user_id', $user->id)
+                    ->where('status', 'active')
+                    ->where(function ($query) {
+                        $query->whereNull('ends_at')
+                            ->orWhere('ends_at', '>', now());
+                    })
+                    ->first();
+
+                if (!$activeSubscription) {
+                    Subscription::create([
+                        'user_id' => $user->id,
                         'plan_id' => $empresarialPlan->id,
                         'billing_cycle' => 'annual',
                         'amount_paid' => $empresarialPlan->price_annual,
-                        'currency' => 'USD',
+                        'currency' => $empresarialPlan->currency,
+                        'status' => 'active',
+                        'starts_at' => now(),
+                        'ends_at' => now()->addYear(),
+                        'payment_method' => 'manual',
+                        'payment_reference' => 'SEED-' . strtoupper(Str::random(8)),
+                        'notes' => "Suscripción demo creada por seeder para {$userName}",
+                    ]);
+                }
+            }
+
+            // Optional: Create subscriptions for employees (vendedor and ceo)
+            $employees = [$vendedor, $ceo];
+            foreach ($employees as $employee) {
+                $activeSubscription = Subscription::where('user_id', $employee->id)
+                    ->where('status', 'active')
+                    ->where(function ($query) {
+                        $query->whereNull('ends_at')
+                            ->orWhere('ends_at', '>', now());
+                    })
+                    ->first();
+
+                if (!$activeSubscription) {
+                    Subscription::create([
+                        'user_id' => $employee->id,
+                        'plan_id' => $empresarialPlan->id,
+                        'billing_cycle' => 'annual',
+                        'amount_paid' => $empresarialPlan->price_annual,
+                        'currency' => $empresarialPlan->currency,
                         'status' => 'active',
                         'starts_at' => now(),
                         'ends_at' => now()->addYear(),
                         'payment_method' => 'manual',
                         'payment_reference' => 'SEED-' . strtoupper(Str::random(8)),
                         'notes' => 'Suscripción demo creada por seeder',
-                    ]
-                );
+                    ]);
+                }
             }
 
-            $this->command->info('  - Subscriptions: 3 annual Empresarial plans');
+            $this->command->info('  - Subscriptions: Active Empresarial plans created/verified for all users');
+        } else {
+            $this->command->warn('  - Warning: Empresarial plan not found. Please run SubscriptionPlansSeeder first.');
         }
 
         $this->command->info('✅ link seeder completed!');
         $this->command->info('');
         $this->command->info('Created:');
-        $this->command->info('  - Organization: Dubacano (slug: dubacano)');
+        $this->command->info('  - Organization: Dubacano (slug: dubacano, type: business)');
         $this->command->info('  - Primary Profile: Dubacano (company profile)');
         $this->command->info('  - Employee: Carlos García (slug: carlos-garcia) - Vendedor');
         $this->command->info('  - Employee: Roberto Martínez (slug: roberto-martinez) - CEO');
         $this->command->info('  - Products: 4 (Peras, Duraznos, Uvas, Manzanas)');
+        $this->command->info('  - Product Sections: 3 (Frutas Destacadas, Ofertas Especiales, Temporada)');
+        $this->command->info('  - Organization: Saamthy (slug: saamthy, type: personal)');
+        $this->command->info('  - Personal Profile: Saamthy - Creadora de Contenido');
         $this->command->info('');
         $this->command->info('URLs:');
         $this->command->info('  - /dubacano - Company profile');
         $this->command->info('  - /dubacano/carlos-garcia - Vendedor profile');
         $this->command->info('  - /dubacano/roberto-martinez - CEO profile');
+        $this->command->info('  - /saamthy - Personal profile (Influencer)');
     }
 }
 

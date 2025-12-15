@@ -114,14 +114,6 @@ class OrganizationController extends Controller
         // Refresh the organization to ensure relationships are loaded
         $organization->refresh();
 
-        // Debug: Log sections count
-        Log::info('Organization edit - productSections count', [
-            'organization_id' => $organization->id,
-            'sections_count' => $organization->productSections->count(),
-            'sections' => $organization->productSections->toArray(),
-            'sections_loaded' => $organization->relationLoaded('productSections'),
-        ]);
-
         $limits = $request->user()->getLimits();
 
         return Inertia::render('Admin/Organizations/Edit', [

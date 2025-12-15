@@ -168,7 +168,7 @@ class Profile extends Model
     }
 
     /**
-     * Scope to find by slug within an organization.
+     * Scope to find by slug within an organization or personal profile.
      */
     public function scopeBySlug($query, string $slug)
     {
@@ -176,17 +176,44 @@ class Profile extends Model
     }
 
     /**
+     * Scope to filter personal profiles (no organization).
+     */
+    public function scopePersonal($query)
+    {
+        return $query->whereNull('organization_id');
+    }
+
+    /**
+     * Scope to filter organization profiles.
+     */
+    public function scopeOrganization($query)
+    {
+        return $query->whereNotNull('organization_id');
+    }
+
+    /**
      * Get the full URL for this profile.
      */
     public function getUrlAttribute(): string
     {
-        $url = config('app.url') . '/' . $this->organization->slug;
-
-        if (!$this->is_primary && $this->slug) {
-            $url .= '/' . $this->slug;
+        // Personal profile (no organization)
+        if (!$this->organization_id && $this->slug) {
+            return config('app.url') . '/' . $this->slug;
         }
 
-        return $url;
+        // Organization profile
+        if ($this->organization) {
+            $url = config('app.url') . '/' . $this->organization->slug;
+
+            if (!$this->is_primary && $this->slug) {
+                $url .= '/' . $this->slug;
+            }
+
+            return $url;
+        }
+
+        // Fallback
+        return config('app.url');
     }
 
     /**

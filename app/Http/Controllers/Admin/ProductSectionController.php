@@ -18,22 +18,55 @@ class ProductSectionController extends Controller
 
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:100'],
-            'slug' => ['nullable', 'string', 'max:60', 'alpha_dash', Rule::unique('product_sections')->where('organization_id', $organization->id)],
+            'slug' => ['nullable', 'string', 'max:60', 'alpha_dash'],
             'description' => ['nullable', 'string', 'max:300'],
             'icon' => ['nullable', 'string', 'max:50'],
         ]);
 
+        // Generate slug from title if not provided
         if (!isset($validated['slug']) || empty($validated['slug'])) {
-            $validated['slug'] = Str::slug($validated['title']);
+            $baseSlug = Str::slug($validated['title']);
+            $slug = $baseSlug;
+            $counter = 1;
+
+            // Ensure slug is unique for this organization
+            while (ProductSection::where('organization_id', $organization->id)
+                ->where('slug', $slug)
+                ->exists()) {
+                $slug = $baseSlug . '-' . $counter;
+                $counter++;
+            }
+
+            $validated['slug'] = $slug;
+        } else {
+            // Validate that provided slug is unique
+            $exists = ProductSection::where('organization_id', $organization->id)
+                ->where('slug', $validated['slug'])
+                ->exists();
+
+            if ($exists) {
+                return back()->withErrors([
+                    'slug' => 'Ya existe una sección con este nombre o slug. Por favor, elige otro nombre.',
+                ])->withInput();
+            }
         }
 
         $validated['organization_id'] = $organization->id;
         $validated['sort_order'] = $organization->productSections()->max('sort_order') + 1;
         $validated['is_active'] = true;
 
-        $section = ProductSection::create($validated);
-
-        return back()->with('success', '¡Sección creada!');
+        try {
+            $section = ProductSection::create($validated);
+            return back()->with('success', '¡Sección creada!');
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Handle any remaining unique constraint violations
+            if ($e->getCode() === '23000') {
+                return back()->withErrors([
+                    'title' => 'Ya existe una sección con este nombre. Por favor, elige otro nombre.',
+                ])->withInput();
+            }
+            throw $e;
+        }
     }
 
     public function update(Request $request, ProductSection $section)
@@ -42,7 +75,7 @@ class ProductSectionController extends Controller
 
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:100'],
-            'slug' => ['nullable', 'string', 'max:60', 'alpha_dash', Rule::unique('product_sections')->where('organization_id', $section->organization_id)->ignore($section->id)],
+            'slug' => ['nullable', 'string', 'max:60', 'alpha_dash'],
             'description' => ['nullable', 'string', 'max:300'],
             'icon' => ['nullable', 'string', 'max:50'],
             'is_active' => ['boolean'],
@@ -50,12 +83,46 @@ class ProductSectionController extends Controller
 
         // Generate slug from title if not provided
         if (empty($validated['slug'])) {
-            $validated['slug'] = Str::slug($validated['title']);
+            $baseSlug = Str::slug($validated['title']);
+            $slug = $baseSlug;
+            $counter = 1;
+
+            // Ensure slug is unique for this organization (excluding current section)
+            while (ProductSection::where('organization_id', $section->organization_id)
+                ->where('slug', $slug)
+                ->where('id', '!=', $section->id)
+                ->exists()) {
+                $slug = $baseSlug . '-' . $counter;
+                $counter++;
+            }
+
+            $validated['slug'] = $slug;
+        } else {
+            // Validate that provided slug is unique (excluding current section)
+            $exists = ProductSection::where('organization_id', $section->organization_id)
+                ->where('slug', $validated['slug'])
+                ->where('id', '!=', $section->id)
+                ->exists();
+
+            if ($exists) {
+                return back()->withErrors([
+                    'slug' => 'Ya existe una sección con este nombre o slug. Por favor, elige otro nombre.',
+                ])->withInput();
+            }
         }
 
-        $section->update($validated);
-
-        return back()->with('success', '¡Sección actualizada!');
+        try {
+            $section->update($validated);
+            return back()->with('success', '¡Sección actualizada!');
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Handle any remaining unique constraint violations
+            if ($e->getCode() === '23000') {
+                return back()->withErrors([
+                    'title' => 'Ya existe una sección con este nombre. Por favor, elige otro nombre.',
+                ])->withInput();
+            }
+            throw $e;
+        }
     }
 
     public function destroy(ProductSection $section)
