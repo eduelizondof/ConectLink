@@ -55,10 +55,13 @@ interface SocialLink {
 interface CustomLink {
     id: number;
     title: string;
-    url: string;
+    url?: string | null;
     description?: string;
     icon?: string;
     thumbnail?: string;
+    image?: string;
+    image_position?: 'left' | 'right' | 'top' | 'bottom' | null;
+    image_shape?: 'square' | 'circle' | null;
     button_color?: string;
     text_color?: string;
     is_highlighted: boolean;
@@ -420,6 +423,30 @@ function getAnimationClasses(animation: string): string {
     return animations[animation] || '';
 }
 
+function getEntranceAnimationClass(animation: string): string {
+    const animations: Record<string, string> = {
+        fade: 'animate-fade-in',
+        'slide-up': 'animate-slide-up',
+        'slide-down': 'animate-slide-down',
+        scale: 'animate-scale-in',
+        bounce: 'animate-bounce-in',
+        none: '',
+    };
+    return animations[animation] || '';
+}
+
+function getImageShapeClass(shape: string | null | undefined): string {
+    if (shape === 'circle') return 'rounded-full';
+    return 'rounded-lg';
+}
+
+function getCardLayoutClass(position: string | null | undefined): string {
+    if (position === 'top' || position === 'bottom') {
+        return 'text-center';
+    }
+    return '';
+}
+
 function dismissAlert(alertId: number) {
     dismissedAlerts.value.push(alertId);
 }
@@ -685,18 +712,23 @@ onMounted(() => {
                     :border-width="2"
                     :duration="3"
                     :style="{ animationDelay: `${index * settings.animation_delay}ms` }"
+                    :class="getEntranceAnimationClass(settings.animation_entrance)"
                 >
-                    <a
-                        :href="link.url"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="block w-full p-4 text-center transition-all duration-300"
+                    <component
+                        :is="link.url ? 'a' : 'div'"
+                        :href="link.url || undefined"
+                        :target="link.url ? '_blank' : undefined"
+                        :rel="link.url ? 'noopener noreferrer' : undefined"
+                        class="block w-full transition-all duration-300"
                         :class="[
                             cardClasses,
                             settings.animation_hover === 'lift' ? 'hover:-translate-y-1' : '',
                             settings.animation_hover === 'glow' && !glowSettings.enabled ? 'hover:shadow-2xl' : '',
                             settings.animation_hover === 'pulse' ? 'hover:animate-pulse' : '',
+                            settings.animation_hover === 'shake' ? 'hover:animate-shake' : '',
                             link.is_highlighted && !glowSettings.enabled ? 'ring-2' : '',
+                            link.url ? 'cursor-pointer' : 'cursor-default',
+                            getCardLayoutClass(link.image_position),
                         ]"
                         :style="{
                             ...cardStyle,
@@ -704,24 +736,105 @@ onMounted(() => {
                             color: link.text_color || settings.text_color,
                             '--tw-ring-color': settings.primary_color,
                         }"
-                        @click="trackClick(link.id)"
+                        @click="link.url ? trackClick(link.id) : null"
                     >
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3 text-left flex-1">
-                                <div
-                                    v-if="link.thumbnail"
-                                    class="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0"
-                                >
-                                    <img :src="link.thumbnail" :alt="link.title" class="w-full h-full object-cover" />
-                                </div>
-                                <div>
-                                    <p class="font-semibold">{{ link.title }}</p>
-                                    <p v-if="link.description" class="text-sm opacity-70">{{ link.description }}</p>
-                                </div>
-                            </div>
-                            <ChevronRight class="w-5 h-5 opacity-50" />
+                        <!-- Image Top (Prominent) -->
+                        <div
+                            v-if="(link.image || link.thumbnail) && link.image_position === 'top'"
+                            class="w-full overflow-hidden"
+                            :class="[
+                                getImageShapeClass(link.image_shape),
+                                'rounded-t-lg',
+                            ]"
+                        >
+                            <img
+                                :src="link.image ? `/storage/${link.image}` : (link.thumbnail ? `/storage/${link.thumbnail}` : '')"
+                                :alt="link.title"
+                                class="w-full h-48 sm:h-56 object-cover"
+                            />
                         </div>
-                    </a>
+
+                        <!-- Content Container -->
+                        <div
+                            class="flex items-center gap-3"
+                            :class="{
+                                'flex-row': link.image_position === 'left' || (!link.image_position && (link.image || link.thumbnail)),
+                                'flex-row-reverse': link.image_position === 'right',
+                                'flex-col': link.image_position === 'top' || link.image_position === 'bottom',
+                                'p-4': link.image_position !== 'top' && link.image_position !== 'bottom',
+                                'p-4 pt-0': link.image_position === 'top',
+                                'p-4 pb-0': link.image_position === 'bottom',
+                            }"
+                        >
+                            <!-- Image Left -->
+                            <div
+                                v-if="(link.image || link.thumbnail) && (link.image_position === 'left' || (!link.image_position && (link.image || link.thumbnail)))"
+                                class="flex-shrink-0 overflow-hidden"
+                                :class="[
+                                    'h-12 w-12 sm:h-14 sm:w-14',
+                                    getImageShapeClass(link.image_shape),
+                                ]"
+                            >
+                                <img
+                                    :src="link.image ? `/storage/${link.image}` : (link.thumbnail ? `/storage/${link.thumbnail}` : '')"
+                                    :alt="link.title"
+                                    class="h-full w-full object-cover"
+                                />
+                            </div>
+
+                            <!-- Text Content -->
+                            <div
+                                class="flex-1 min-w-0 text-left"
+                                :class="{
+                                    'text-center': link.image_position === 'top' || link.image_position === 'bottom',
+                                }"
+                            >
+                                <p class="font-semibold">{{ link.title }}</p>
+                                <p v-if="link.description" class="text-sm opacity-70 mt-1">{{ link.description }}</p>
+                            </div>
+
+                            <!-- Image Right -->
+                            <div
+                                v-if="(link.image || link.thumbnail) && link.image_position === 'right'"
+                                class="flex-shrink-0 overflow-hidden"
+                                :class="[
+                                    'h-12 w-12 sm:h-14 sm:w-14',
+                                    getImageShapeClass(link.image_shape),
+                                ]"
+                            >
+                                <img
+                                    :src="link.image ? `/storage/${link.image}` : (link.thumbnail ? `/storage/${link.thumbnail}` : '')"
+                                    :alt="link.title"
+                                    class="h-full w-full object-cover"
+                                />
+                            </div>
+
+                            <!-- Chevron (only if has URL) -->
+                            <ChevronRight
+                                v-if="link.url"
+                                class="w-5 h-5 opacity-50 flex-shrink-0"
+                                :class="{
+                                    'hidden': link.image_position === 'top' || link.image_position === 'bottom',
+                                }"
+                            />
+                        </div>
+
+                        <!-- Image Bottom (Prominent) -->
+                        <div
+                            v-if="(link.image || link.thumbnail) && link.image_position === 'bottom'"
+                            class="w-full overflow-hidden"
+                            :class="[
+                                getImageShapeClass(link.image_shape),
+                                'rounded-b-lg',
+                            ]"
+                        >
+                            <img
+                                :src="link.image ? `/storage/${link.image}` : (link.thumbnail ? `/storage/${link.thumbnail}` : '')"
+                                :alt="link.title"
+                                class="w-full h-48 sm:h-56 object-cover"
+                            />
+                        </div>
+                    </component>
                 </component>
             </div>
 
@@ -1151,6 +1264,71 @@ onMounted(() => {
 
 .animate-bounce {
     animation: soft-bounce 2s ease-in-out infinite;
+}
+
+/* Entrance Animations */
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.animate-fade-in {
+    animation: fade-in 0.6s ease-out;
+}
+
+@keyframes slide-down {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.animate-slide-down {
+    animation: slide-down 0.6s ease-out;
+}
+
+@keyframes scale-in {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.animate-scale-in {
+    animation: scale-in 0.6s ease-out;
+}
+
+@keyframes bounce-in {
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.animate-bounce-in {
+    animation: bounce-in 0.6s ease-out;
 }
 
 /* Line clamp */

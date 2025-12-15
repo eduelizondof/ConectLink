@@ -7,13 +7,20 @@ import {
     Trash2,
     Link2,
     Star,
-    ExternalLink,
 } from 'lucide-vue-next';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ColorPicker } from '@/components/ui/color-picker';
+import { ImageUpload } from '@/components/ui/image-upload';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import {
     Dialog,
     DialogContent,
@@ -34,6 +41,9 @@ const form = useForm({
     title: '',
     url: '',
     description: '',
+    image: null as File | null,
+    image_position: '' as 'left' | 'right' | 'top' | 'bottom' | '',
+    image_shape: '' as 'square' | 'circle' | '',
     button_color: '',
     text_color: '',
     is_highlighted: false,
@@ -56,9 +66,10 @@ function openAddModal() {
 function submitAdd() {
     form.post(`/admin/profiles/${props.profile.id}/custom-links`, {
         preserveScroll: true,
+        forceFormData: true,
         onSuccess: () => {
             showAddModal.value = false;
-            swal.success('¡Link agregado!');
+            swal.success('¡Tarjeta agregada!');
         },
     });
 }
@@ -91,9 +102,9 @@ function toggleHighlight(link: any) {
     <div class="rounded-xl border bg-card p-6 space-y-4">
         <div class="flex items-center justify-between">
             <div>
-                <h3 class="font-semibold">Links Personalizados</h3>
+                <h3 class="font-semibold">Tarjetas Personalizadas</h3>
                 <p class="text-sm text-muted-foreground">
-                    {{ profile.custom_links?.length || 0 }}/{{ maxLinks }} links
+                    {{ profile.custom_links?.length || 0 }}/{{ maxLinks }} tarjetas
                 </p>
             </div>
             <Button
@@ -115,9 +126,26 @@ function toggleHighlight(link: any) {
                 class="flex items-center gap-3 rounded-lg border p-3 transition-all hover:bg-muted/50"
                 :class="{ 'ring-2 ring-amber-400': link.is_highlighted }"
             >
-                <!-- Icon/Indicator -->
+                <!-- Icon/Image -->
                 <div
-                    class="flex h-10 w-10 items-center justify-center rounded-lg"
+                    v-if="link.image || link.thumbnail"
+                    class="flex-shrink-0 overflow-hidden"
+                    :class="{
+                        'h-10 w-10': link.image_position === 'left' || link.image_position === 'right' || !link.image_position,
+                        'h-16 w-16': link.image_position === 'top' || link.image_position === 'bottom',
+                        'rounded-lg': link.image_shape === 'square' || !link.image_shape,
+                        'rounded-full': link.image_shape === 'circle',
+                    }"
+                >
+                    <img
+                        :src="link.image ? `/storage/${link.image}` : (link.thumbnail ? `/storage/${link.thumbnail}` : '')"
+                        :alt="link.title"
+                        class="h-full w-full object-cover"
+                    />
+                </div>
+                <div
+                    v-else
+                    class="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0"
                     :style="{ backgroundColor: link.button_color || '#3b82f6' }"
                 >
                     <Link2 class="h-5 w-5 text-white" />
@@ -161,14 +189,14 @@ function toggleHighlight(link: any) {
         <!-- Empty State -->
         <div v-else class="text-center py-8 text-muted-foreground">
             <Link2 class="h-12 w-12 mx-auto mb-3 opacity-50" />
-            <p>No hay links personalizados</p>
+            <p>No hay tarjetas personalizadas</p>
         </div>
 
         <!-- Add Modal -->
         <Dialog v-model:open="showAddModal" :modal="true">
-            <DialogContent v-if="!isUnmounting" class="max-w-md">
+            <DialogContent v-if="!isUnmounting" class="max-w-md max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>Agregar Link</DialogTitle>
+                    <DialogTitle>Agregar Tarjeta</DialogTitle>
                 </DialogHeader>
 
                 <form @submit.prevent="submitAdd" class="space-y-4">
@@ -183,13 +211,13 @@ function toggleHighlight(link: any) {
                     </div>
 
                     <div class="space-y-2">
-                        <Label for="link-url">URL *</Label>
+                        <Label for="link-url">URL</Label>
                         <Input
                             id="link-url"
                             v-model="form.url"
-                            placeholder="https://..."
-                            required
+                            placeholder="https://... (opcional)"
                         />
+                        <p class="text-xs text-muted-foreground">Deja vacío para crear una tarjeta informativa sin enlace</p>
                     </div>
 
                     <div class="space-y-2">
@@ -199,6 +227,46 @@ function toggleHighlight(link: any) {
                             v-model="form.description"
                             placeholder="Breve descripción..."
                         />
+                    </div>
+
+                    <div class="space-y-2">
+                        <Label>Imagen</Label>
+                        <ImageUpload
+                            v-model="form.image"
+                            aspect-ratio="auto"
+                            :max-size="2"
+                            placeholder="Arrastra una imagen o haz clic para seleccionar"
+                        />
+                    </div>
+
+                    <div v-if="form.image" class="grid gap-4 sm:grid-cols-2">
+                        <div class="space-y-2">
+                            <Label>Posición de la imagen</Label>
+                            <Select v-model="form.image_position">
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Seleccionar posición" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="left">Izquierda (como icono)</SelectItem>
+                                    <SelectItem value="right">Derecha (como icono)</SelectItem>
+                                    <SelectItem value="top">Arriba (prominente)</SelectItem>
+                                    <SelectItem value="bottom">Abajo (prominente)</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div class="space-y-2">
+                            <Label>Forma de la imagen</Label>
+                            <Select v-model="form.image_shape">
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Seleccionar forma" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="square">Cuadrada</SelectItem>
+                                    <SelectItem value="circle">Redonda</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
 
                     <div class="grid gap-4 sm:grid-cols-2">
@@ -220,7 +288,7 @@ function toggleHighlight(link: any) {
                         />
                         <Label for="link-highlighted" class="cursor-pointer flex items-center gap-2">
                             <Star class="h-4 w-4 text-amber-500" />
-                            Destacar este link
+                            Destacar esta tarjeta
                         </Label>
                     </div>
 

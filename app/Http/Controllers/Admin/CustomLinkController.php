@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Profile;
 use App\Models\CustomLink;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class CustomLinkController extends Controller
 {
@@ -15,15 +16,18 @@ class CustomLinkController extends Controller
 
         $limits = $request->user()->getLimits();
         if ($profile->customLinks()->count() >= $limits->max_custom_links_per_profile) {
-            return back()->with('error', 'Has alcanzado el límite de links personalizados.');
+            return back()->with('error', 'Has alcanzado el límite de tarjetas personalizadas.');
         }
 
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:100'],
-            'url' => ['required', 'string', 'max:255'],
+            'url' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:200'],
             'icon' => ['nullable', 'string', 'max:50'],
             'thumbnail' => ['nullable', 'image', 'max:1024'],
+            'image' => ['nullable', 'image', 'max:2048'],
+            'image_position' => ['nullable', 'in:left,right,top,bottom'],
+            'image_shape' => ['nullable', 'in:square,circle'],
             'button_color' => ['nullable', 'string', 'max:50'],
             'text_color' => ['nullable', 'string', 'max:50'],
             'is_highlighted' => ['boolean'],
@@ -31,6 +35,10 @@ class CustomLinkController extends Controller
 
         if ($request->hasFile('thumbnail')) {
             $validated['thumbnail'] = $request->file('thumbnail')->store('thumbnails', 'public');
+        }
+
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('custom-links', 'public');
         }
 
         $validated['profile_id'] = $profile->id;
@@ -39,7 +47,7 @@ class CustomLinkController extends Controller
 
         CustomLink::create($validated);
 
-        return back()->with('success', '¡Link agregado!');
+        return back()->with('success', '¡Tarjeta agregada!');
     }
 
     public function update(Request $request, CustomLink $customLink)
@@ -48,10 +56,13 @@ class CustomLinkController extends Controller
 
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:100'],
-            'url' => ['required', 'string', 'max:255'],
+            'url' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:200'],
             'icon' => ['nullable', 'string', 'max:50'],
             'thumbnail' => ['nullable', 'image', 'max:1024'],
+            'image' => ['nullable', 'image', 'max:2048'],
+            'image_position' => ['nullable', 'in:left,right,top,bottom'],
+            'image_shape' => ['nullable', 'in:square,circle'],
             'button_color' => ['nullable', 'string', 'max:50'],
             'text_color' => ['nullable', 'string', 'max:50'],
             'is_highlighted' => ['boolean'],
@@ -60,9 +71,16 @@ class CustomLinkController extends Controller
 
         if ($request->hasFile('thumbnail')) {
             if ($customLink->thumbnail) {
-                \Storage::disk('public')->delete($customLink->thumbnail);
+                Storage::disk('public')->delete($customLink->thumbnail);
             }
             $validated['thumbnail'] = $request->file('thumbnail')->store('thumbnails', 'public');
+        }
+
+        if ($request->hasFile('image')) {
+            if ($customLink->image) {
+                Storage::disk('public')->delete($customLink->image);
+            }
+            $validated['image'] = $request->file('image')->store('custom-links', 'public');
         }
 
         $customLink->update($validated);
@@ -75,7 +93,11 @@ class CustomLinkController extends Controller
         $this->authorize('update', $customLink->profile->organization);
 
         if ($customLink->thumbnail) {
-            \Storage::disk('public')->delete($customLink->thumbnail);
+            Storage::disk('public')->delete($customLink->thumbnail);
+        }
+
+        if ($customLink->image) {
+            Storage::disk('public')->delete($customLink->image);
         }
 
         $customLink->delete();

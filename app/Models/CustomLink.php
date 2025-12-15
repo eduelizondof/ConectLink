@@ -17,6 +17,9 @@ class CustomLink extends Model
         'description',
         'icon',
         'thumbnail',
+        'image',
+        'image_position',
+        'image_shape',
         'button_color',
         'text_color',
         'is_highlighted',
@@ -73,6 +76,30 @@ class CustomLink extends Model
     public function scopeHighlighted($query)
     {
         return $query->where('is_highlighted', true);
+    }
+
+    /**
+     * Get the full URL for the image.
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        if (!$this->image) {
+            return null;
+        }
+
+        return asset('storage/' . $this->image);
+    }
+
+    /**
+     * Get the full URL for the thumbnail.
+     */
+    public function getThumbnailUrlAttribute(): ?string
+    {
+        if (!$this->thumbnail) {
+            return null;
+        }
+
+        return asset('storage/' . $this->thumbnail);
     }
 }
 

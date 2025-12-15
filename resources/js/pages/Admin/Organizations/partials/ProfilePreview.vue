@@ -224,18 +224,67 @@ function getSocialIcon(platform: string) {
 
                 <!-- Custom Links -->
                 <div v-if="profile.custom_links?.length" class="mt-6 space-y-2 px-2">
-                    <div
+                    <component
+                        :is="link.url ? 'a' : 'div'"
                         v-for="link in profile.custom_links.slice(0, 3)"
                         :key="link.id"
-                        class="p-3 shadow-sm flex items-center justify-between"
-                        :class="cardClass"
+                        :href="link.url || undefined"
+                        :target="link.url ? '_blank' : undefined"
+                        :rel="link.url ? 'noopener noreferrer' : undefined"
+                        class="p-3 shadow-sm flex items-center gap-3"
+                        :class="[
+                            cardClass,
+                            link.url ? 'cursor-pointer hover:opacity-90' : 'cursor-default',
+                        ]"
                         :style="{ backgroundColor: link.button_color || settings.card_background_color }"
                     >
-                        <span class="text-sm font-medium truncate" :style="{ color: link.text_color || settings.text_color }">
-                            {{ link.title }}
-                        </span>
-                        <ChevronRight class="w-4 h-4 opacity-50" :style="{ color: link.text_color || settings.text_color }" />
-                    </div>
+                        <!-- Image Left -->
+                        <div
+                            v-if="(link.image || link.thumbnail) && (link.image_position === 'left' || (!link.image_position && (link.image || link.thumbnail)))"
+                            class="flex-shrink-0 overflow-hidden"
+                            :class="{
+                                'h-8 w-8': true,
+                                'rounded-lg': link.image_shape === 'square' || !link.image_shape,
+                                'rounded-full': link.image_shape === 'circle',
+                            }"
+                        >
+                            <img
+                                :src="link.image ? `/storage/${link.image}` : (link.thumbnail ? `/storage/${link.thumbnail}` : '')"
+                                :alt="link.title"
+                                class="h-full w-full object-cover"
+                            />
+                        </div>
+
+                        <!-- Content -->
+                        <div class="flex-1 min-w-0">
+                            <span class="text-sm font-medium truncate block" :style="{ color: link.text_color || settings.text_color }">
+                                {{ link.title }}
+                            </span>
+                            <span v-if="link.description" class="text-xs opacity-70 truncate block" :style="{ color: link.text_color || settings.text_color }">
+                                {{ link.description }}
+                            </span>
+                        </div>
+
+                        <!-- Image Right -->
+                        <div
+                            v-if="(link.image || link.thumbnail) && link.image_position === 'right'"
+                            class="flex-shrink-0 overflow-hidden"
+                            :class="{
+                                'h-8 w-8': true,
+                                'rounded-lg': link.image_shape === 'square' || !link.image_shape,
+                                'rounded-full': link.image_shape === 'circle',
+                            }"
+                        >
+                            <img
+                                :src="link.image ? `/storage/${link.image}` : (link.thumbnail ? `/storage/${link.thumbnail}` : '')"
+                                :alt="link.title"
+                                class="h-full w-full object-cover"
+                            />
+                        </div>
+
+                        <!-- Chevron -->
+                        <ChevronRight v-if="link.url" class="w-4 h-4 opacity-50 flex-shrink-0" :style="{ color: link.text_color || settings.text_color }" />
+                    </component>
                 </div>
 
                 <!-- Download Contact Button -->
