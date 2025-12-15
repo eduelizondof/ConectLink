@@ -20,6 +20,9 @@ class ProfileSetting extends Model
         'background_gradient_direction',
         'background_image',
         'background_overlay_opacity',
+        'background_animated_media',
+        'background_animated_media_type',
+        'background_animated_overlay_opacity',
         'background_pattern',
         'background_pattern_opacity',
         // Theme colors
@@ -122,6 +125,9 @@ class ProfileSetting extends Model
         return match ($this->background_type) {
             'gradient' => "background: linear-gradient({$this->background_gradient_direction}, {$this->background_gradient_start}, {$this->background_gradient_end});",
             'image' => "background-image: url('{$this->background_image}'); background-size: cover; background-position: center;",
+            'animated' => $this->background_animated_media 
+                ? "background-image: url('{$this->background_animated_media}'); background-size: cover; background-position: center;"
+                : "background-color: {$this->background_color};",
             default => "background-color: {$this->background_color};",
         };
     }

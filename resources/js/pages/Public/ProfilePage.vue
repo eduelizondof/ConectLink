@@ -89,6 +89,9 @@ interface ProfileSettings {
     background_gradient_direction: string;
     background_image?: string;
     background_overlay_opacity: number;
+    background_animated_media?: string;
+    background_animated_media_type?: 'image' | 'gif' | 'video';
+    background_animated_overlay_opacity?: number;
     background_pattern?: string;
     background_pattern_opacity?: number;
     primary_color: string;
@@ -202,6 +205,9 @@ const backgroundStyle = computed(() => {
             backgroundSize: 'cover',
             backgroundPosition: 'center',
         };
+    } else if (s.background_type === 'animated' && s.background_animated_media) {
+        // For animated backgrounds, return empty style as we'll use a video/img element
+        return {};
     }
     return { backgroundColor: s.background_color };
 });
@@ -497,6 +503,36 @@ onMounted(() => {
 
     <!-- Main Container -->
     <div class="min-h-screen" :style="backgroundStyle">
+        <!-- Animated Background (Video/GIF/Image) -->
+        <div
+            v-if="settings.background_type === 'animated' && settings.background_animated_media"
+            class="fixed inset-0 z-0 overflow-hidden"
+        >
+            <!-- Video Background -->
+            <video
+                v-if="settings.background_animated_media_type === 'video'"
+                :src="`/storage/${settings.background_animated_media}`"
+                autoplay
+                loop
+                muted
+                playsinline
+                class="absolute inset-0 w-full h-full object-cover"
+            />
+            <!-- GIF/Image Background -->
+            <img
+                v-else
+                :src="`/storage/${settings.background_animated_media}`"
+                alt="Background"
+                class="absolute inset-0 w-full h-full object-cover"
+            />
+            <!-- Overlay for animated backgrounds -->
+            <div
+                v-if="(settings.background_animated_overlay_opacity || 0) > 0"
+                class="absolute inset-0 bg-black pointer-events-none"
+                :style="{ opacity: (settings.background_animated_overlay_opacity || 0) / 100 }"
+            />
+        </div>
+
         <!-- Background Pattern Overlay -->
         <div
             v-if="settings.background_pattern && settings.background_pattern !== 'none'"
@@ -505,10 +541,10 @@ onMounted(() => {
             :style="{ opacity: (settings.background_pattern_opacity || 10) / 100 }"
         />
 
-        <!-- Background Overlay (for images) -->
+        <!-- Background Overlay (for static images) -->
         <div
             v-if="settings.background_type === 'image' && settings.background_overlay_opacity > 0"
-            class="fixed inset-0 bg-black pointer-events-none"
+            class="fixed inset-0 bg-black pointer-events-none z-0"
             :style="{ opacity: settings.background_overlay_opacity / 100 }"
         />
 

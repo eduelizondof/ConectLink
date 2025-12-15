@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { 
     Palette,
@@ -21,6 +21,7 @@ import {
 import ProfilePreview from './ProfilePreview.vue';
 import {
     DesignBackgroundSection,
+    DesignAnimatedBackgroundSection,
     DesignColorsSection,
     DesignCardsSection,
     DesignAnimationsSection,
@@ -53,11 +54,12 @@ const emit = defineEmits<{
 }>();
 
 const selectedProfile = computed(() =>
-    props.organization.profiles.find(p => p.id === props.selectedProfileId)
+    props.organization.profiles.find(p => p.id === props.selectedProfileId) || null
 );
 
 // Refs for child components
 const backgroundRef = ref<InstanceType<typeof DesignBackgroundSection> | null>(null);
+const animatedBackgroundRef = ref<InstanceType<typeof DesignAnimatedBackgroundSection> | null>(null);
 const colorsRef = ref<InstanceType<typeof DesignColorsSection> | null>(null);
 const cardsRef = ref<InstanceType<typeof DesignCardsSection> | null>(null);
 const animationsRef = ref<InstanceType<typeof DesignAnimationsSection> | null>(null);
@@ -74,6 +76,7 @@ const previewSettings = computed(() => {
     return {
         ...base,
         ...(backgroundRef.value?.formData || {}),
+        ...(animatedBackgroundRef.value?.formData || {}),
         ...(colorsRef.value?.formData || {}),
         ...(cardsRef.value?.formData || {}),
         ...(animationsRef.value?.formData || {}),
@@ -86,7 +89,7 @@ const previewProfile = computed(() => {
     if (!selectedProfile.value) return null;
     return {
         ...selectedProfile.value,
-        settings: previewSettings.value,
+        settings: previewSettings.value as any,
     };
 });
 
@@ -139,6 +142,23 @@ function resetToDefaults() {
                         <AccordionContent class="px-4 pb-4">
                             <DesignBackgroundSection
                                 ref="backgroundRef"
+                                :profile="selectedProfile"
+                                @updated="handleSectionUpdated"
+                            />
+                        </AccordionContent>
+                    </AccordionItem>
+
+                    <!-- Animated Background Section -->
+                    <AccordionItem value="animated-background">
+                        <AccordionTrigger class="px-4">
+                            <div class="flex items-center gap-2">
+                                <Image class="h-4 w-4 text-muted-foreground" />
+                                <span>Fondo de imágen</span>
+                            </div>
+                        </AccordionTrigger>
+                        <AccordionContent class="px-4 pb-4">
+                            <DesignAnimatedBackgroundSection
+                                ref="animatedBackgroundRef"
                                 :profile="selectedProfile"
                                 @updated="handleSectionUpdated"
                             />

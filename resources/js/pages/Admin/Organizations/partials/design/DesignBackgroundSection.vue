@@ -2,8 +2,7 @@
 import { computed, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { useSwal } from '@/composables/useSwal';
-import { Image, Square, Palette, Save, Loader2 } from 'lucide-vue-next';
-import { ImageUpload } from '@/components/ui/image-upload';
+import { Square, Palette, Save, Loader2 } from 'lucide-vue-next';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -37,8 +36,6 @@ const form = useForm({
     background_gradient_start: '#3b82f6',
     background_gradient_end: '#8b5cf6',
     background_gradient_direction: 'to-b',
-    background_image: null as File | null,
-    background_overlay_opacity: 0,
     background_pattern: 'none',
     background_pattern_opacity: 10,
 });
@@ -47,15 +44,21 @@ const form = useForm({
 watch(() => props.profile, (profile) => {
     if (profile?.settings) {
         const s = profile.settings;
-        form.background_type = s.background_type || 'solid';
-        form.background_color = s.background_color || '#ffffff';
-        form.background_gradient_start = s.background_gradient_start || '#3b82f6';
-        form.background_gradient_end = s.background_gradient_end || '#8b5cf6';
-        form.background_gradient_direction = s.background_gradient_direction || 'to-b';
-        form.background_overlay_opacity = s.background_overlay_opacity || 0;
+        // Only load if background_type is solid or gradient
+        const bgType = s.background_type || 'solid';
+        if (bgType === 'solid' || bgType === 'gradient') {
+            form.background_type = bgType;
+            form.background_color = s.background_color || '#ffffff';
+            form.background_gradient_start = s.background_gradient_start || '#3b82f6';
+            form.background_gradient_end = s.background_gradient_end || '#8b5cf6';
+            form.background_gradient_direction = s.background_gradient_direction || 'to-b';
+        } else {
+            // Default to solid if current type is image or animated
+            form.background_type = 'solid';
+            form.background_color = s.background_color || '#ffffff';
+        }
         form.background_pattern = s.background_pattern || 'none';
         form.background_pattern_opacity = s.background_pattern_opacity || 10;
-        form.background_image = null;
     }
 }, { immediate: true });
 
@@ -63,7 +66,6 @@ watch(() => props.profile, (profile) => {
 const backgroundTypes = [
     { value: 'solid', label: 'Color sólido', icon: Square },
     { value: 'gradient', label: 'Gradiente', icon: Palette },
-    { value: 'image', label: 'Imagen', icon: Image },
 ];
 
 const gradientDirections = [
@@ -93,8 +95,6 @@ function save() {
         background_gradient_direction: form.background_gradient_direction,
         background_pattern: form.background_pattern,
         background_pattern_opacity: form.background_pattern_opacity,
-        background_overlay_opacity: form.background_overlay_opacity,
-        background_image: form.background_image,
     });
 
     // Ensure background_type is set
@@ -128,13 +128,6 @@ function save() {
         if (form.background_gradient_direction) {
             submitData.background_gradient_direction = form.background_gradient_direction;
         }
-    } else if (form.background_type === 'image') {
-        if (form.background_overlay_opacity !== undefined) {
-            submitData.background_overlay_opacity = form.background_overlay_opacity;
-        }
-        if (form.background_image) {
-            submitData.background_image = form.background_image;
-        }
     }
 
     console.log('Final submitData before form creation:', submitData);
@@ -142,33 +135,16 @@ function save() {
 
     // Create a new form instance with only the necessary data
     const submitForm = useForm(submitData);
-
-    console.log('Form data after creation:', submitForm.data());
-    console.log('Form data keys:', Object.keys(submitForm.data()));
-    console.log('Has background_image:', !!submitData.background_image);
-    
-    // Only use forceFormData if there's an image file
-    const hasImageFile = submitData.background_image instanceof File;
     
     submitForm.put(`/admin/profiles/${props.profile.id}/design/background`, {
         preserveScroll: true,
-        forceFormData: hasImageFile, // Only use FormData when there's an actual file
-        onBefore: () => {
-            console.log('Before submit - Form data:', submitForm.data());
-            console.log('Before submit - Using FormData:', hasImageFile);
-        },
         onSuccess: () => {
             swal.success('¡Fondo guardado!');
             emit('updated');
-            // Reset background_image after successful save
-            form.background_image = null;
         },
         onError: (errors) => {
             console.error('Error saving background:', errors);
             console.error('Submitted data:', submitData);
-            console.error('Form data at error:', submitForm.data());
-            console.error('Form processing:', submitForm.processing);
-            console.error('Using FormData:', hasImageFile);
             swal.error('Error al guardar. Verifica los datos e intenta de nuevo.');
         },
     });
@@ -185,7 +161,7 @@ defineExpose({
         <!-- Background Type -->
         <div class="space-y-2">
             <Label>Tipo de fondo</Label>
-            <div class="grid grid-cols-3 gap-2">
+            <div class="grid grid-cols-2 gap-2">
                 <button
                     v-for="type in backgroundTypes"
                     :key="type.value"
@@ -236,26 +212,6 @@ defineExpose({
                         {{ dir.label }}
                     </button>
                 </div>
-            </div>
-        </div>
-
-        <!-- Background Image -->
-        <div v-if="form.background_type === 'image'" class="space-y-4">
-            <ImageUpload
-                v-model="form.background_image"
-                :current-image="profile?.settings?.background_image"
-                label="Imagen de fondo"
-                aspect-ratio="auto"
-                :max-size="4"
-            />
-            <div class="space-y-2">
-                <Label>Opacidad del overlay: {{ form.background_overlay_opacity }}%</Label>
-                <Slider
-                    :model-value="[form.background_overlay_opacity]"
-                    @update:model-value="(val) => form.background_overlay_opacity = val?.[0] ?? 0"
-                    :max="100"
-                    :step="5"
-                />
             </div>
         </div>
 

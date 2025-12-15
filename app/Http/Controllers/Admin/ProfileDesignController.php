@@ -18,13 +18,16 @@ class ProfileDesignController extends Controller
 
         try {
             $validated = $request->validate([
-                'background_type' => ['required', 'in:solid,gradient,image'],
+                'background_type' => ['required', 'in:solid,gradient,image,animated'],
                 'background_color' => ['nullable', 'string', 'max:20', 'regex:/^#?[0-9A-Fa-f]{6}$/'],
                 'background_gradient_start' => ['nullable', 'string', 'max:20', 'regex:/^#?[0-9A-Fa-f]{6}$/'],
                 'background_gradient_end' => ['nullable', 'string', 'max:20', 'regex:/^#?[0-9A-Fa-f]{6}$/'],
                 'background_gradient_direction' => ['nullable', 'in:to-b,to-r,to-br,to-bl'],
                 'background_image' => ['nullable', 'image', 'max:4096'],
                 'background_overlay_opacity' => ['nullable', 'integer', 'min:0', 'max:100'],
+                'background_animated_media' => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif,webp,mp4,webm,ogg', 'max:10240'], // 10MB max
+                'background_animated_media_type' => ['nullable', 'in:image,gif,video'],
+                'background_animated_overlay_opacity' => ['nullable', 'integer', 'min:0', 'max:100'],
                 'background_pattern' => ['nullable', 'in:none,dots,grid,waves,noise'],
                 'background_pattern_opacity' => ['nullable', 'integer', 'min:0', 'max:100'],
             ]);
@@ -39,6 +42,44 @@ class ProfileDesignController extends Controller
             } else {
                 // Remove background_image from validated if no file was sent
                 unset($validated['background_image']);
+            }
+
+            // Handle animated background media upload
+            if ($request->hasFile('background_animated_media')) {
+                $settings = $profile->settings;
+                if ($settings && $settings->background_animated_media) {
+                    Storage::disk('public')->delete($settings->background_animated_media);
+                }
+                $file = $request->file('background_animated_media');
+                $validated['background_animated_media'] = $file->store('backgrounds/animated', 'public');
+                
+                // Determine media type based on file extension
+                $extension = strtolower($file->getClientOriginalExtension());
+                if (in_array($extension, ['mp4', 'webm', 'ogg'])) {
+                    $validated['background_animated_media_type'] = 'video';
+                } elseif ($extension === 'gif') {
+                    $validated['background_animated_media_type'] = 'gif';
+                } else {
+                    $validated['background_animated_media_type'] = 'image';
+                }
+            } else {
+                // Remove background_animated_media from validated if no file was sent
+                unset($validated['background_animated_media']);
+                if (!$request->has('background_animated_media_type')) {
+                    unset($validated['background_animated_media_type']);
+                }
+            }
+
+            // Handle deletion of animated background
+            // Check if delete flag is set or background_type changes from animated
+            if ($request->has('delete_animated_background') || 
+                ($request->has('background_type') && $request->input('background_type') !== 'animated' && $profile->settings && $profile->settings->background_type === 'animated')) {
+                $settings = $profile->settings;
+                if ($settings && $settings->background_animated_media) {
+                    Storage::disk('public')->delete($settings->background_animated_media);
+                    $validated['background_animated_media'] = null;
+                    $validated['background_animated_media_type'] = null;
+                }
             }
 
             // Normalize color values (ensure they start with #)
@@ -62,7 +103,7 @@ class ProfileDesignController extends Controller
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::error('Background validation failed', [
                 'errors' => $e->errors(),
-                'request_data' => $request->except(['background_image']),
+                'request_data' => $request->except(['background_image', 'background_animated_media']),
                 'profile_id' => $profile->id,
             ]);
             return back()->withErrors($e->errors())->withInput();

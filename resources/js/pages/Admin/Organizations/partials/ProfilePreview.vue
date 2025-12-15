@@ -31,6 +31,9 @@ interface Profile {
         background_gradient_start?: string;
         background_gradient_end?: string;
         background_gradient_direction: string;
+        background_animated_media?: string;
+        background_animated_media_type?: 'image' | 'gif' | 'video';
+        background_animated_overlay_opacity?: number;
         primary_color: string;
         text_color: string;
         text_secondary_color: string;
@@ -53,9 +56,15 @@ const props = defineProps<{
     organization: Organization;
 }>();
 
-const settings = computed(() => props.profile.settings || {
+const settings = computed(() => ({
     background_type: 'solid',
     background_color: '#ffffff',
+    background_gradient_start: '#3b82f6',
+    background_gradient_end: '#8b5cf6',
+    background_gradient_direction: 'to-b',
+    background_animated_media: undefined,
+    background_animated_media_type: undefined,
+    background_animated_overlay_opacity: 0,
     primary_color: '#3b82f6',
     text_color: '#1f2937',
     text_secondary_color: '#6b7280',
@@ -63,15 +72,19 @@ const settings = computed(() => props.profile.settings || {
     card_background_color: '#ffffff',
     card_border_radius: 'lg',
     photo_style: 'circle',
-});
+    ...props.profile.settings,
+}));
 
 const backgroundStyle = computed(() => {
     const s = settings.value;
-    if (s.background_type === 'gradient') {
+    if (s.background_type === 'gradient' && s.background_gradient_start && s.background_gradient_end) {
         const dir = s.background_gradient_direction === 'to-b' ? '180deg' :
                     s.background_gradient_direction === 'to-r' ? '90deg' :
                     s.background_gradient_direction === 'to-br' ? '135deg' : '180deg';
         return { background: `linear-gradient(${dir}, ${s.background_gradient_start}, ${s.background_gradient_end})` };
+    } else if (s.background_type === 'animated' && s.background_animated_media) {
+        // For animated backgrounds, return empty style as we'll use a video/img element
+        return {};
     }
     return { backgroundColor: s.background_color };
 });
@@ -116,9 +129,39 @@ function getSocialIcon(platform: string) {
             <div class="w-20 h-4 bg-black rounded-full" />
         </div>
 
+        <!-- Animated Background -->
+        <div
+            v-if="settings.background_type === 'animated' && settings.background_animated_media"
+            class="absolute inset-0 z-0 overflow-hidden rounded-2xl"
+        >
+            <!-- Video Background -->
+            <video
+                v-if="settings.background_animated_media_type === 'video'"
+                :src="`/storage/${settings.background_animated_media}`"
+                autoplay
+                loop
+                muted
+                playsinline
+                class="absolute inset-0 w-full h-full object-cover"
+            />
+            <!-- GIF/Image Background -->
+            <img
+                v-else
+                :src="`/storage/${settings.background_animated_media}`"
+                alt="Background"
+                class="absolute inset-0 w-full h-full object-cover"
+            />
+            <!-- Overlay -->
+            <div
+                v-if="(settings.background_animated_overlay_opacity || 0) > 0"
+                class="absolute inset-0 bg-black"
+                :style="{ opacity: (settings.background_animated_overlay_opacity || 0) / 100 }"
+            />
+        </div>
+
         <!-- Content -->
         <div
-            class="pt-6 overflow-y-auto"
+            class="relative pt-6 overflow-y-auto z-10"
             :style="[backgroundStyle, { minHeight: '500px', maxHeight: '600px' }]"
         >
             <div class="px-4 py-6 text-center">
