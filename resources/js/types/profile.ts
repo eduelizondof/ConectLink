@@ -65,6 +65,8 @@ export interface ProfileSettings {
     card_glow_color?: string;
     card_glow_color_secondary?: string;
     card_glow_variant?: 'default' | 'cyan' | 'purple' | 'rainbow' | 'primary';
+    card_glow_duration?: number;
+    card_glow_opacity?: number;
     font_family: string;
     font_size: string;
     animation_entrance: string;

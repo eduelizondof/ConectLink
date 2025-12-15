@@ -14,6 +14,8 @@ const props = defineProps<{
         colorSecondary: string;
         variant: string;
         borderRadius: string;
+        duration: number;
+        opacity: number;
     };
     cardClasses: string;
     cardStyle: Record<string, string>;
@@ -47,7 +49,8 @@ function handleClick() {
         :variant="glowSettings.variant"
         :border-radius="glowSettings.borderRadius"
         :border-width="2"
-        :duration="3"
+        :duration="glowSettings.duration"
+        :opacity="glowSettings.opacity"
     >
         <button
             class="text-left transition-all duration-300 w-full"

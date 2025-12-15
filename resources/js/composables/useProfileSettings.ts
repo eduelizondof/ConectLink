@@ -19,6 +19,8 @@ export function getDefaultSettings(): ProfileSettings {
         card_shadow: true,
         card_glow_enabled: false,
         card_glow_variant: 'primary',
+        card_glow_duration: 6,
+        card_glow_opacity: 1.0,
         font_family: 'Inter',
         font_size: 'base',
         animation_entrance: 'fade',
@@ -203,11 +205,13 @@ export function useProfileSettings(profileSettings?: MaybeRefOrGetter<ProfileSet
     });
 
     const glowSettings = computed(() => ({
-        enabled: settings.value.card_glow_enabled || false,
+        enabled: settings.value.card_glow_enabled ?? false,
         color: settings.value.card_glow_color || settings.value.primary_color,
         colorSecondary: settings.value.card_glow_color_secondary || settings.value.secondary_color,
         variant: settings.value.card_glow_variant || 'primary',
         borderRadius: cardBorderRadiusValue.value,
+        duration: settings.value.card_glow_duration ?? 6,
+        opacity: settings.value.card_glow_opacity ?? 1.0,
     }));
 
     return {

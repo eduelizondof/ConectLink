@@ -14,6 +14,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
 
 interface Profile {
     id: number;
@@ -40,6 +41,8 @@ const form = useForm({
     card_glow_color: '#3b82f6',
     card_glow_color_secondary: '#8b5cf6',
     card_glow_variant: 'primary',
+    card_glow_duration: 6,
+    card_glow_opacity: 1.0,
 });
 
 // Load settings when profile changes
@@ -56,6 +59,8 @@ watch(() => props.profile, (profile) => {
         form.card_glow_color = s.card_glow_color || '#3b82f6';
         form.card_glow_color_secondary = s.card_glow_color_secondary || '#8b5cf6';
         form.card_glow_variant = s.card_glow_variant || 'primary';
+        form.card_glow_duration = s.card_glow_duration ?? 6;
+        form.card_glow_opacity = s.card_glow_opacity ?? 1.0;
     }
 }, { immediate: true });
 
@@ -98,6 +103,8 @@ function save() {
         card_glow_color: form.card_glow_color,
         card_glow_color_secondary: form.card_glow_color_secondary,
         card_glow_variant: form.card_glow_variant,
+        card_glow_duration: form.card_glow_duration,
+        card_glow_opacity: form.card_glow_opacity,
     };
 
     form.transform(() => data).put(`/admin/profiles/${props.profile.id}/design/cards`, {
@@ -122,6 +129,8 @@ defineExpose({
         card_glow_color: form.card_glow_color,
         card_glow_color_secondary: form.card_glow_color_secondary,
         card_glow_variant: form.card_glow_variant,
+        card_glow_duration: form.card_glow_duration,
+        card_glow_opacity: form.card_glow_opacity,
     })),
 });
 </script>
@@ -293,6 +302,62 @@ defineExpose({
                             v-model="form.card_glow_color_secondary"
                             label=""
                         />
+                    </div>
+                </div>
+
+                <!-- Glow Duration -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <Label class="text-xs">Velocidad de animación</Label>
+                            <div class="group relative">
+                                <Info class="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                                <div class="absolute left-0 top-6 z-10 hidden w-64 rounded-md border bg-popover p-2 text-xs text-popover-foreground shadow-md group-hover:block">
+                                    Controla qué tan rápido gira el efecto de brillo. Valores más bajos = más rápido, valores más altos = más lento.
+                                </div>
+                            </div>
+                        </div>
+                        <span class="text-xs text-muted-foreground tabular-nums">{{ form.card_glow_duration }}s</span>
+                    </div>
+                    <Slider
+                        :model-value="[form.card_glow_duration]"
+                        @update:model-value="(val) => { if (val) form.card_glow_duration = val[0] }"
+                        :min="1"
+                        :max="30"
+                        :step="1"
+                        class="w-full"
+                    />
+                    <div class="flex justify-between text-[10px] text-muted-foreground">
+                        <span>Rápido (1s)</span>
+                        <span>Lento (30s)</span>
+                    </div>
+                </div>
+
+                <!-- Glow Opacity -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <Label class="text-xs">Intensidad del brillo</Label>
+                            <div class="group relative">
+                                <Info class="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                                <div class="absolute left-0 top-6 z-10 hidden w-64 rounded-md border bg-popover p-2 text-xs text-popover-foreground shadow-md group-hover:block">
+                                    Controla qué tan visible es el efecto de brillo. 0% = invisible, 100% = completamente visible.
+                                </div>
+                            </div>
+                        </div>
+                        <span class="text-xs text-muted-foreground tabular-nums">{{ Math.round(form.card_glow_opacity * 100) }}%</span>
+                    </div>
+                    <Slider
+                        :model-value="[form.card_glow_opacity]"
+                        @update:model-value="(val) => { if (val) form.card_glow_opacity = val[0] }"
+                        :min="0"
+                        :max="1"
+                        :step="0.1"
+                        class="w-full"
+                    />
+                    <div class="flex justify-between text-[10px] text-muted-foreground">
+                        <span>Sutil (0%)</span>
+                        <span>Intenso (100%)</span>
                     </div>
                 </div>
             </div>

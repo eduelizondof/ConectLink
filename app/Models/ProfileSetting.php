@@ -40,6 +40,8 @@ class ProfileSetting extends Model
         'card_glow_color',
         'card_glow_color_secondary',
         'card_glow_variant',
+        'card_glow_duration',
+        'card_glow_opacity',
         // Typography
         'font_family',
         'font_size',
@@ -66,9 +68,12 @@ class ProfileSetting extends Model
     {
         return [
             'background_overlay_opacity' => 'integer',
+            'background_animated_overlay_opacity' => 'integer',
             'background_pattern_opacity' => 'integer',
             'card_shadow' => 'boolean',
             'card_glow_enabled' => 'boolean',
+            'card_glow_duration' => 'integer',
+            'card_glow_opacity' => 'decimal:2',
             'animation_delay' => 'integer',
             'show_profile_photo' => 'boolean',
             'social_colored' => 'boolean',
@@ -152,6 +157,8 @@ class ProfileSetting extends Model
             'card_shadow' => true,
             'card_glow_enabled' => false,
             'card_glow_variant' => 'primary',
+            'card_glow_duration' => 6,
+            'card_glow_opacity' => 1.0,
             'font_family' => 'Inter',
             'font_size' => 'base',
             'animation_entrance' => 'fade',

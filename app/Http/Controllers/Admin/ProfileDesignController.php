@@ -153,11 +153,17 @@ class ProfileDesignController extends Controller
             'card_glow_color' => ['nullable', 'string', 'max:7'],
             'card_glow_color_secondary' => ['nullable', 'string', 'max:7'],
             'card_glow_variant' => ['nullable', 'in:default,cyan,purple,rainbow,primary'],
+            'card_glow_duration' => ['nullable', 'integer', 'min:1', 'max:30'],
+            'card_glow_opacity' => ['nullable', 'numeric', 'min:0', 'max:1'],
         ]);
 
         // Convert booleans
         $validated['card_shadow'] = filter_var($validated['card_shadow'] ?? false, FILTER_VALIDATE_BOOLEAN);
         $validated['card_glow_enabled'] = filter_var($validated['card_glow_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+        // Set defaults for glow customization if not provided
+        $validated['card_glow_duration'] = $validated['card_glow_duration'] ?? 6;
+        $validated['card_glow_opacity'] = $validated['card_glow_opacity'] ?? 1.0;
 
         $this->updateProfileSettings($profile, $validated);
 
