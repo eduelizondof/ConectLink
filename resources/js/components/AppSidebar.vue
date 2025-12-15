@@ -43,13 +43,13 @@ const mainNavItems: NavItem[] = [
 
 const footerNavItems: NavItem[] = [
     {
-        title: 'Ver mi perfil',
-        href: '/',
+        title: 'CNVA',
+        href: 'https://cnva.mx',
         icon: ExternalLink,
     },
     {
         title: 'Ayuda',
-        href: '#',
+        href: 'https://wa.me/5213322428574',
         icon: HelpCircle,
     },
 ];
