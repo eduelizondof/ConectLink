@@ -8,13 +8,9 @@ import {
     Zap, 
     Palette, 
     Share2, 
-    Smartphone, 
-    ShoppingBag, 
     RefreshCw, 
-    Link2, 
     User, 
     Store, 
-    Briefcase, 
     Users, 
     Camera,
     ChevronRight,
@@ -24,7 +20,8 @@ import {
     X,
     Home,
     Info,
-    Mail
+    Mail,
+    MessageCircle
 } from 'lucide-vue-next';
 
 withDefaults(
@@ -60,13 +57,10 @@ const scrollToSection = (sectionId: string) => {
 };
 
 const benefits = [
-    { icon: Zap, text: 'Presencia digital profesional en segundos' },
-    { icon: Palette, text: 'Totalmente personalizable a tu estilo y marca' },
-    { icon: Share2, text: 'Comparte por WhatsApp, redes sociales o QR' },
-    { icon: Smartphone, text: 'Compatible con cualquier celular' },
-    { icon: ShoppingBag, text: 'Ideal para catálogos, servicios o portafolios' },
-    { icon: RefreshCw, text: 'Actualiza en tiempo real sin reimprimir' },
-    { icon: Link2, text: 'Perfecta como link-in-bio o mini-sitio personal' },
+    { icon: Zap, text: 'Control total sobre tu diseño sin limitaciones ni restricciones' },
+    { icon: Palette, text: 'Catálogo completamente personalizable que cambias cuando quieras' },
+    { icon: Share2, text: 'Comparte por WhatsApp, redes sociales, QR o link único' },
+    { icon: RefreshCw, text: 'Actualiza productos, precios y contenido en tiempo real' },
 ];
 
 const steps = [
@@ -77,11 +71,10 @@ const steps = [
 ];
 
 const useCases = [
-    { icon: User, title: 'Profesionales', description: 'Tarjeta moderna para networking' },
-    { icon: Store, title: 'Tiendas', description: 'Comparte catálogo y precios fácilmente' },
-    { icon: Briefcase, title: 'Freelancers', description: 'Link ordenado y profesional' },
-    { icon: Users, title: 'Equipos de ventas', description: 'Información rápida desde el celular' },
-    { icon: Camera, title: 'Creativos', description: 'Muestra portafolio y redes sociales' },
+    { icon: Camera, title: 'Influencers y Creativos', description: 'Control total y catálogo personalizable. Sin plantillas limitadas, sin restricciones' },
+    { icon: Store, title: 'Empresas', description: 'Tarjetas digitales profesionales para tu equipo. Comparte catálogo y precios actualizables' },
+    { icon: User, title: 'Profesionales', description: 'Tarjeta digital moderna para networking y conexiones profesionales' },
+    { icon: Users, title: 'Equipos de ventas', description: 'Información rápida desde el celular. Actualiza contenido en tiempo real' },
 ];
 
 const navLinks = [
@@ -93,8 +86,9 @@ const navLinks = [
 </script>
 
 <template>
-    <Head title="Tu tarjeta digital inteligente">
-        <meta name="description" content="Link - La forma más fácil, moderna y profesional de compartir toda tu información, enlaces y catálogos desde un solo lugar." />
+    <Head title="Tarjeta Digital Profesional | Link - Para Influencers y Empresas">
+        <meta name="description" content="Tarjeta digital profesional con control total y catálogo personalizable. Perfecta para influencers y empresas. Sin limitaciones, sin restricciones. Crea tu página en minutos." />
+        <meta name="keywords" content="tarjeta digital, tarjeta digital influencers, tarjeta digital empresas, catálogo digital personalizable, tarjeta de presentación digital, linktree alternativo, tarjeta digital profesional, control total diseño" />
     </Head>
 
     <!-- Background -->
@@ -114,7 +108,7 @@ const navLinks = [
                 <!-- Logo -->
                 <button @click="scrollToSection('hero')" class="flex items-center gap-2 group">
                     <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-cyan-600 shadow-lg group-hover:scale-105 transition-transform">
-                        <Globe class="h-5 w-5 text-white" />
+                        <img src="/icono-bco.png" alt="Logo" class="h-10 w-10" />
                     </div>
                     <span class="font-display text-xl font-bold">
                         <span class="gradient-text-connect"></span><span class="text-white">Link</span>
@@ -141,7 +135,7 @@ const navLinks = [
                         :href="dashboard()"
                         class="btn-glow rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg"
                     >
-                        Dashboard
+                        Ingresa
                     </Link>
                     <template v-else>
                         <Link
@@ -164,13 +158,13 @@ const navLinks = [
 
         <!-- Mobile Logo Header -->
         <header 
-            class="fixed left-0 right-0 top-0 z-50 flex items-center justify-center px-4 py-4 lg:hidden safe-top"
+            class="fixed left-0 right-0 top-0 z-50 flex items-center justify-center px-4 py-4 lg:hidden safe-top "
             :class="{ 'opacity-0 -translate-y-4': !isLoaded, 'opacity-100 translate-y-0': isLoaded }"
             style="transition: all 0.6s ease-out;"
         >
-            <button @click="scrollToSection('hero')" class="flex items-center gap-2 group">
-                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-cyan-600 shadow-lg group-hover:scale-105 transition-transform glow-cyan-sm">
-                    <Globe class="h-5 w-5 text-white" />
+            <button @click="scrollToSection('hero')" class="flex items-center gap-2 group pt-4">
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-cyan-600 shadow-lg group-hover:scale-105 transition-transform glow-cyan-sm ">
+                    <img src="/icono-bco.png" alt="Logo" class="h-10 w-10" />
                 </div>
                 <span class="font-display text-xl font-bold">
                     <span class="gradient-text-connect">Link</span><span class="text-white"></span>
@@ -237,7 +231,7 @@ const navLinks = [
                         class="mb-6 font-display text-4xl font-bold leading-tight sm:text-5xl lg:text-7xl"
                         :class="{ 'fade-in-up fade-in-up-delay-1': isLoaded }"
                     >
-                        <span class="gradient-text-connect">Conect</span><span class="text-white">Link</span>
+                        <span class="gradient-text-connect">Link</span><span class="text-white"></span>
                         <br />
                         <span class="text-glow-white">Tu tarjeta digital</span>
                         <br />
@@ -249,8 +243,9 @@ const navLinks = [
                         class="mx-auto mb-8 max-w-2xl text-lg text-white/70 sm:text-xl"
                         :class="{ 'fade-in-up fade-in-up-delay-2': isLoaded }"
                     >
-                        La forma más fácil, moderna y profesional de compartir toda tu información, 
-                        enlaces y catálogos desde <span class="font-semibold text-cyan-400">un solo lugar</span>.
+                        La mejor opción para <span class="font-semibold text-cyan-400">influencers</span> y 
+                        <span class="font-semibold text-cyan-400">empresas</span>. Control total, 
+                        catálogo personalizable y sin limitaciones. Todo desde <span class="font-semibold text-cyan-400">un solo lugar</span>.
                     </p>
 
                     <!-- CTA Buttons -->
@@ -316,16 +311,19 @@ const navLinks = [
                             <span class="gradient-text"> profesional</span>
                         </h2>
                         <p class="mx-auto max-w-3xl text-lg text-white/70">
-                            Link es una tarjeta de presentación digital diseñada por 
-                            <span class="font-semibold text-cyan-400">Conectiva ITS</span>, creada para que profesionales, 
-                            emprendedores y negocios compartan toda su información con un solo clic. 
-                            Personaliza tu página, organiza tus enlaces, muestra tu catálogo, comparte tu contacto 
-                            y haz que tus clientes te encuentren rápido, desde cualquier dispositivo.
+                            Link es una tarjeta digital profesional diseñada por 
+                            <span class="font-semibold text-cyan-400">Conectiva ITS</span>, creada para 
+                            <span class="font-semibold text-cyan-400">influencers</span> que buscan control total sobre su diseño 
+                            y catálogo personalizable, y para <span class="font-semibold text-cyan-400">empresas</span> que necesitan 
+                            tarjetas digitales profesionales para sus equipos. A diferencia de otras opciones, Link te ofrece 
+                            <span class="font-semibold text-cyan-400">sin limitaciones</span>: personaliza completamente tu página, 
+                            organiza tus enlaces ilimitados, muestra tu catálogo de productos con precios actualizables, 
+                            comparte tu contacto y haz que tus clientes te encuentren rápido, desde cualquier dispositivo.
                         </p>
                     </div>
 
                     <!-- Benefits Grid -->
-                    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    <div class="grid gap-4 sm:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4">
                         <div 
                             v-for="(benefit, index) in benefits" 
                             :key="index"
@@ -379,7 +377,7 @@ const navLinks = [
                     <!-- CTA -->
                     <div class="mt-12 text-center">
                         <Link
-                            v-if="!$page.props.auth.user && canRegister"
+                            
                             :href="login()"
                             class="btn-glow inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-600 px-8 py-4 text-lg font-semibold text-white shadow-lg"
                         >
@@ -390,22 +388,75 @@ const navLinks = [
                 </div>
             </section>
 
+            <!-- Influencers Section -->
+            <section class="px-4 py-20">
+                <div class="mx-auto max-w-6xl">
+                    <!-- Section Header -->
+                    <div class="mb-16 text-center">
+                        <span class="mb-4 inline-block rounded-full border border-purple-500/30 bg-purple-500/10 px-4 py-1 text-sm font-medium text-purple-400">
+                            Para Influencers y Creativos
+                        </span>
+                        <h2 class="mb-6 font-display text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
+                            Control total que otras plataformas
+                            <span class="gradient-text-connect"> no ofrecen</span>
+                        </h2>
+                        <p class="mx-auto max-w-3xl text-lg text-white/70">
+                            Si eres influencer o creativo, Link te ofrece lo que otras opciones no pueden: 
+                            <span class="font-semibold text-cyan-400">control total</span> sobre tu diseño sin plantillas limitadas, 
+                            <span class="font-semibold text-cyan-400">catálogo completamente personalizable</span> que puedes cambiar cuando quieras, 
+                            y la libertad de mostrar tus productos, servicios y contenido exactamente como lo imaginas. 
+                            Sin limitaciones de enlaces, sin restricciones de diseño. Tu marca, tu estilo, tu control.
+                        </p>
+                    </div>
+
+                    <!-- Benefits for Influencers -->
+                    <div class="mb-12 grid gap-6 sm:grid-cols-1 lg:grid-cols-3">
+                        <div class="card-hover glass group rounded-2xl p-6">
+                            <h3 class="mb-3 font-display text-xl font-bold text-white">Sin Limitaciones</h3>
+                            <p class="text-sm text-white/70">
+                                Agrega todos los enlaces que necesites, secciones ilimitadas y contenido multimedia. 
+                                Sin restricciones como en otras plataformas.
+                            </p>
+                        </div>
+                        <div class="card-hover glass group rounded-2xl p-6">
+                            <h3 class="mb-3 font-display text-xl font-bold text-white">Catálogo Personalizable</h3>
+                            <p class="text-sm text-white/70">
+                                Crea y actualiza tu catálogo de productos cuando quieras. Cambia precios, 
+                                imágenes y descripciones en tiempo real sin límites.
+                            </p>
+                        </div>
+                        <div class="card-hover glass group rounded-2xl p-6">
+                            <h3 class="mb-3 font-display text-xl font-bold text-white">Diseño Libre</h3>
+                            <p class="text-sm text-white/70">
+                                Personaliza cada detalle: colores, fuentes, layout y estructura. 
+                                Sin plantillas predefinidas que limiten tu creatividad.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Use Cases Section -->
             <section class="px-4 py-20">
                 <div class="mx-auto max-w-6xl">
                     <!-- Section Header -->
                     <div class="mb-16 text-center">
                         <span class="mb-4 inline-block rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1 text-sm font-medium text-emerald-400">
-                            Ejemplos de uso
+                            Para Empresas y Profesionales
                         </span>
                         <h2 class="mb-6 font-display text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
-                            Perfecto para
-                            <span class="gradient-text-connect"> cualquiera</span>
+                            Tarjetas digitales
+                            <span class="gradient-text-connect"> profesionales</span>
                         </h2>
+                        <p class="mx-auto max-w-3xl text-lg text-white/70">
+                            Las empresas confían en Link para crear tarjetas digitales profesionales para sus equipos. 
+                            Comparte catálogos actualizables, información de contacto, enlaces importantes y haz que tu marca 
+                            se destaque con una presencia digital moderna y sin restricciones.
+                        </p>
                     </div>
 
                     <!-- Use Cases Grid -->
-                    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+                    <div class="grid gap-6 sm:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4">
                         <div 
                             v-for="(useCase, index) in useCases" 
                             :key="index"
@@ -435,8 +486,9 @@ const navLinks = [
                                 <br />comparte más fácil
                             </h2>
                             <p class="mx-auto mb-8 max-w-xl text-lg text-white/70">
-                                Link te ayuda a destacar. Haz que tus clientes te encuentren rápido 
-                                y ofrece una experiencia moderna. Todo desde un solo enlace.
+                                Si eres influencer buscando control total y catálogo personalizable, o empresa necesitando 
+                                tarjetas digitales profesionales, Link es tu solución. Sin limitaciones, sin restricciones. 
+                                Haz que tus clientes te encuentren rápido y ofrece una experiencia moderna. Todo desde un solo enlace.
                             </p>
                             
                             <div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -457,6 +509,16 @@ const navLinks = [
                                     Ir a mi Dashboard
                                     <ChevronRight class="h-5 w-5 transition-transform group-hover:translate-x-1" />
                                 </Link>
+                                <a
+                                    href="https://wa.me/5213322428574"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="btn-glow group flex items-center gap-2 rounded-xl bg-gradient-to-r from-green-500 to-green-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:from-green-600 hover:to-green-700"
+                                >
+                                    <MessageCircle class="h-5 w-5" />
+                                    Empieza a usarlo ya
+                                    <ChevronRight class="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -470,7 +532,7 @@ const navLinks = [
                         <!-- Logo -->
                         <div class="flex items-center gap-2">
                             <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-400 to-cyan-600">
-                                <Globe class="h-4 w-4 text-white" />
+                                <img src="/icono-bco.png" alt="Logo" class="h-8 w-8" />
                             </div>
                             <span class="font-display text-lg font-bold">
                                 <span class="gradient-text-connect">Link</span><span class="text-white"></span>
@@ -480,17 +542,17 @@ const navLinks = [
                         <!-- Copyright -->
                         <p class="text-center text-sm text-white/50">
                             © {{ new Date().getFullYear() }} Link. Un producto de
-                            <a href="https://conectivaits.mx" target="_blank" class="font-medium text-cyan-400 hover:underline">
-                                Conectiva ITS
+                            <a href="https://cnva.mx" target="_blank" class="font-medium text-cyan-400 hover:underline">
+                                CNVA by Conectiva ITS
                             </a>
                         </p>
 
                         <!-- Social / Links -->
                         <div class="flex items-center gap-4">
-                            <a href="#" class="text-white/50 transition-colors hover:text-cyan-400">
+                            <a href="https://conectivaits.mx/aviso-privacidad" class="text-white/50 transition-colors hover:text-cyan-400">
                                 Privacidad
                             </a>
-                            <a href="#" class="text-white/50 transition-colors hover:text-cyan-400">
+                            <a href="https://conectivaits.mx/terminos-y-condiciones" class="text-white/50 transition-colors hover:text-cyan-400">
                                 Términos
                             </a>
                         </div>
