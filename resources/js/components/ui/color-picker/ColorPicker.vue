@@ -3,16 +3,23 @@ import { ref, watch } from 'vue';
 import { Pipette } from 'lucide-vue-next';
 
 const props = defineProps<{
-    modelValue: string;
+    modelValue: string | null | undefined;
     label?: string;
     presets?: string[];
 }>();
 
 const emit = defineEmits<{
-    'update:modelValue': [value: string];
+    'update:modelValue': [value: string | null];
 }>();
 
-const localValue = ref(props.modelValue);
+// Use a default color for the color input when value is null/empty
+const DEFAULT_COLOR = '#000000';
+const getColorValue = (val: string | null | undefined) => {
+    return val && val.trim() ? val : DEFAULT_COLOR;
+};
+
+const localValue = ref(getColorValue(props.modelValue));
+const wasOriginallyEmpty = ref(!props.modelValue || props.modelValue.trim() === '');
 
 const defaultPresets = [
     '#3b82f6', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b',
@@ -23,15 +30,31 @@ const defaultPresets = [
 const presetColors = props.presets || defaultPresets;
 
 watch(localValue, (val) => {
-    emit('update:modelValue', val);
+    // If value is empty or default and it was originally empty, emit null
+    if ((!val || val.trim() === '' || val === DEFAULT_COLOR) && wasOriginallyEmpty.value) {
+        emit('update:modelValue', null);
+    } else {
+        // Otherwise emit the actual value (or null if empty)
+        emit('update:modelValue', val && val.trim() ? val : null);
+    }
 });
 
 watch(() => props.modelValue, (val) => {
-    localValue.value = val;
+    wasOriginallyEmpty.value = !val || val.trim() === '';
+    localValue.value = getColorValue(val);
 });
 
 function selectPreset(color: string) {
     localValue.value = color;
+}
+
+function handleHexBlur() {
+    // Validate hex color format
+    const value = localValue.value;
+    if (value && !value.match(/^#[0-9A-Fa-f]{6}$/)) {
+        // Reset to default if invalid
+        localValue.value = DEFAULT_COLOR;
+    }
 }
 </script>
 
@@ -56,6 +79,7 @@ function selectPreset(color: string) {
                 maxlength="7"
                 class="h-12 w-24 rounded-lg border bg-background px-3 text-sm font-mono uppercase"
                 placeholder="#000000"
+                @blur="handleHexBlur"
             />
         </div>
 

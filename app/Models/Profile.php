@@ -97,6 +97,7 @@ class Profile extends Model
     {
         return $this->hasMany(CustomLink::class)
             ->where('is_active', true)
+            ->orderBy('is_highlighted', 'desc')
             ->orderBy('sort_order');
     }
 

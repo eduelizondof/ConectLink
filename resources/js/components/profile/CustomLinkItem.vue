@@ -56,7 +56,6 @@ function handleClick() {
                 settings.animation_hover === 'glow' && !glowSettings.enabled ? 'hover:shadow-2xl' : '',
                 settings.animation_hover === 'pulse' ? 'hover:animate-pulse' : '',
                 settings.animation_hover === 'shake' ? 'hover:animate-shake' : '',
-                link.is_highlighted && !glowSettings.enabled ? 'ring-2' : '',
                 link.url ? 'cursor-pointer' : 'cursor-default',
                 getCardLayoutClass(link.image_position),
             ]"
@@ -64,7 +63,6 @@ function handleClick() {
                 ...cardStyle,
                 backgroundColor: link.button_color || cardStyle.backgroundColor,
                 color: link.text_color || settings.text_color,
-                '--tw-ring-color': settings.primary_color,
             }"
             @click="handleClick"
         >

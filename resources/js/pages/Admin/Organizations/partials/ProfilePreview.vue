@@ -120,6 +120,13 @@ function getSocialIcon(platform: string) {
     };
     return icons[platform] || Link2;
 }
+
+const sortedCustomLinks = computed(() => {
+    if (!props.profile.custom_links) return [];
+    return [...props.profile.custom_links].sort((a: any, b: any) => {
+        return (a.sort_order || 0) - (b.sort_order || 0);
+    });
+});
 </script>
 
 <template>
@@ -223,10 +230,10 @@ function getSocialIcon(platform: string) {
                 </div>
 
                 <!-- Custom Links -->
-                <div v-if="profile.custom_links?.length" class="mt-6 space-y-2 px-2">
+                <div v-if="sortedCustomLinks.length" class="mt-6 space-y-2 px-2">
                     <component
                         :is="link.url ? 'a' : 'div'"
-                        v-for="link in profile.custom_links.slice(0, 3)"
+                        v-for="link in sortedCustomLinks"
                         :key="link.id"
                         :href="link.url || undefined"
                         :target="link.url ? '_blank' : undefined"
