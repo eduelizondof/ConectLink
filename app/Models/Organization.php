@@ -85,6 +85,14 @@ class Organization extends Model
     }
 
     /**
+     * Get all product sections for this organization.
+     */
+    public function productSections(): HasMany
+    {
+        return $this->hasMany(ProductSection::class);
+    }
+
+    /**
      * Scope to filter active organizations.
      */
     public function scopeActive($query)

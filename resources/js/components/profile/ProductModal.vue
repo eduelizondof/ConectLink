@@ -21,6 +21,17 @@ function closeModal() {
     emit('update:modelValue', false);
 }
 
+// Compute the image URL, handling both old format (relative path) and new format (full URL)
+const imageUrl = computed(() => {
+    if (!props.product?.image) return null;
+    // If already a full URL or starts with /storage/, use as-is
+    if (props.product.image.startsWith('http') || props.product.image.startsWith('/storage/')) {
+        return props.product.image;
+    }
+    // Otherwise, prepend /storage/
+    return `/storage/${props.product.image}`;
+});
+
 const whatsappLink = computed(() => {
     const whatsapp = props.profile.social_links.find((l) => l.platform === 'whatsapp');
     if (!whatsapp || !props.product) return null;
@@ -53,8 +64,8 @@ const whatsappLink = computed(() => {
                 <!-- Product Image -->
                 <div class="aspect-video w-full overflow-hidden rounded-t-3xl sm:rounded-t-3xl bg-gray-100">
                     <img
-                        v-if="product.image"
-                        :src="product.image"
+                        v-if="imageUrl"
+                        :src="imageUrl"
                         :alt="product.name"
                         class="w-full h-full object-cover"
                     />

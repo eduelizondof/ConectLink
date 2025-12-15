@@ -92,6 +92,9 @@ export interface Product {
     sale_price?: number;
     currency: string;
     image?: string;
+    gallery?: string[];
+    external_url?: string;
+    whatsapp_message?: string;
     is_featured: boolean;
     is_available: boolean;
     category?: { id: number; name: string; slug: string };
@@ -102,6 +105,15 @@ export interface Category {
     name: string;
     slug: string;
     products_count: number;
+}
+
+export interface ProductSection {
+    id: number;
+    title: string;
+    slug: string;
+    description?: string;
+    icon?: string;
+    products: Product[];
 }
 
 export interface Profile {

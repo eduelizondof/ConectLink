@@ -5,11 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
     use HasFactory, SoftDeletes;
+
+    protected $appends = [
+        'image_url',
+    ];
 
     protected $fillable = [
         'organization_id',
@@ -60,6 +65,34 @@ class Product extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(ProductCategory::class, 'category_id');
+    }
+
+    /**
+     * Get the sections this product belongs to.
+     */
+    public function sections(): BelongsToMany
+    {
+        return $this->belongsToMany(ProductSection::class)
+            ->withPivot('sort_order')
+            ->orderByPivot('sort_order')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get the full URL for the product image.
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        if (!$this->image) {
+            return null;
+        }
+
+        // If already a full URL, return as-is
+        if (str_starts_with($this->image, 'http') || str_starts_with($this->image, '/storage/')) {
+            return $this->image;
+        }
+
+        return asset('storage/' . $this->image);
     }
 
     /**

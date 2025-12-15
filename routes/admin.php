@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\OrganizationController;
 use App\Http\Controllers\Admin\PlansController;
 use App\Http\Controllers\Admin\ProductCategoryController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ProductSectionController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\ProfileDesignController;
 use App\Http\Controllers\Admin\QrBusinessCardController;
@@ -94,6 +95,15 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
     Route::post('/organizations/{organization}/products/reorder', [ProductController::class, 'reorder'])->name('products.reorder');
+    Route::put('/products/{product}/sections', [ProductController::class, 'updateSections'])->name('products.sections.update');
+
+    // Product Sections
+    Route::post('/organizations/{organization}/sections', [ProductSectionController::class, 'store'])->name('sections.store');
+    Route::put('/sections/{section}', [ProductSectionController::class, 'update'])->name('sections.update');
+    Route::delete('/sections/{section}', [ProductSectionController::class, 'destroy'])->name('sections.destroy');
+    Route::post('/organizations/{organization}/sections/reorder', [ProductSectionController::class, 'reorder'])->name('sections.reorder');
+    Route::post('/sections/{section}/products', [ProductSectionController::class, 'assignProducts'])->name('sections.products.assign');
+    Route::delete('/sections/{section}/products/{product}', [ProductSectionController::class, 'removeProduct'])->name('sections.products.remove');
 });
 
 

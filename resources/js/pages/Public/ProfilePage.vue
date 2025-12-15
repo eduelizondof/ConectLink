@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
 import { ref, onMounted, watch } from 'vue';
-import type { Profile, Organization, Product, Category } from '@/types/profile';
+import type { Profile, Organization, Product, Category, ProductSection } from '@/types/profile';
 import { useProfileSettings } from '@/composables/useProfileSettings';
 import ProfileBackground from '@/components/profile/ProfileBackground.vue';
 import ProfileHeader from '@/components/profile/ProfileHeader.vue';
@@ -18,6 +18,7 @@ const props = defineProps<{
     profile: Profile;
     products: Product[];
     categories: Category[];
+    sections?: ProductSection[];
 }>();
 
 // State
@@ -136,8 +137,10 @@ onMounted(() => {
 
             <!-- Products Catalog -->
             <ProductsCatalog
-                :products="products"
-                :categories="categories"
+                v-if="(products && products.length > 0) || (sections && sections.length > 0)"
+                :products="products || []"
+                :categories="categories || []"
+                :sections="sections || []"
                 :settings="settings"
                 :is-loaded="isLoaded"
                 @product-selected="openProductModal"

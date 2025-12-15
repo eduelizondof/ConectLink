@@ -123,6 +123,29 @@ class ProductController extends Controller
 
         return back()->with('success', '¡Orden actualizado!');
     }
+
+    /**
+     * Update sections for a product.
+     */
+    public function updateSections(Request $request, Product $product)
+    {
+        $this->authorize('update', $product->organization);
+
+        $validated = $request->validate([
+            'section_ids' => ['array'],
+            'section_ids.*' => ['exists:product_sections,id'],
+        ]);
+
+        // Verify sections belong to the same organization
+        $sectionIds = \App\Models\ProductSection::whereIn('id', $validated['section_ids'] ?? [])
+            ->where('organization_id', $product->organization_id)
+            ->pluck('id')
+            ->toArray();
+
+        $product->sections()->sync($sectionIds);
+
+        return back()->with('success', '¡Secciones actualizadas!');
+    }
 }
 
 

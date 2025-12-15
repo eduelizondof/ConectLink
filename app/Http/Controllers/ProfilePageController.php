@@ -45,6 +45,18 @@ class ProfilePageController extends Controller
             ->withCount(['products' => fn($q) => $q->where('is_active', true)])
             ->get();
 
+        // Load product sections with their products
+        $sections = $organization->productSections()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->with(['products' => function ($q) {
+                $q->where('is_active', true)
+                    ->orderByPivot('sort_order');
+            }])
+            ->get()
+            ->map(fn($section) => $this->formatSection($section))
+            ->toArray();
+
         return Inertia::render('Public/ProfilePage', [
             'organization' => [
                 'id' => $organization->id,
@@ -55,8 +67,9 @@ class ProfilePageController extends Controller
                 'description' => $organization->description,
             ],
             'profile' => $this->formatProfile($profile),
-            'products' => $products,
+            'products' => $this->formatProducts($products),
             'categories' => $categories,
+            'sections' => $sections ?: [], // Always send an array, even if empty
         ]);
     }
 
@@ -94,6 +107,18 @@ class ProfilePageController extends Controller
             ->withCount(['products' => fn($q) => $q->where('is_active', true)])
             ->get();
 
+        // Load product sections with their products
+        $sections = $organization->productSections()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->with(['products' => function ($q) {
+                $q->where('is_active', true)
+                    ->orderByPivot('sort_order');
+            }])
+            ->get()
+            ->map(fn($section) => $this->formatSection($section))
+            ->toArray();
+
         return Inertia::render('Public/ProfilePage', [
             'organization' => [
                 'id' => $organization->id,
@@ -104,8 +129,9 @@ class ProfilePageController extends Controller
                 'description' => $organization->description,
             ],
             'profile' => $this->formatProfile($profile),
-            'products' => $products,
+            'products' => $this->formatProducts($products),
             'categories' => $categories,
+            'sections' => $sections ?: [], // Always send an array, even if empty
         ]);
     }
 
@@ -292,6 +318,57 @@ class ProfilePageController extends Controller
 
             $profile->incrementViews();
         }
+    }
+
+    /**
+     * Format products collection for frontend.
+     */
+    protected function formatProducts($products): array
+    {
+        return $products->map(fn($product) => $this->formatProduct($product))->toArray();
+    }
+
+    /**
+     * Format a single product for frontend.
+     */
+    protected function formatProduct($product): array
+    {
+        return [
+            'id' => $product->id,
+            'name' => $product->name,
+            'slug' => $product->slug,
+            'short_description' => $product->short_description,
+            'description' => $product->description,
+            'price' => $product->price,
+            'sale_price' => $product->sale_price,
+            'currency' => $product->currency,
+            'image' => $product->image_url,
+            'gallery' => $product->gallery,
+            'external_url' => $product->external_url,
+            'whatsapp_message' => $product->whatsapp_message,
+            'is_featured' => $product->is_featured,
+            'is_available' => $product->is_available,
+            'category' => $product->category ? [
+                'id' => $product->category->id,
+                'name' => $product->category->name,
+                'slug' => $product->category->slug,
+            ] : null,
+        ];
+    }
+
+    /**
+     * Format a section for frontend.
+     */
+    protected function formatSection($section): array
+    {
+        return [
+            'id' => $section->id,
+            'title' => $section->title,
+            'slug' => $section->slug,
+            'description' => $section->description,
+            'icon' => $section->icon,
+            'products' => $section->products->map(fn($product) => $this->formatProduct($product))->toArray(),
+        ];
     }
 }
 

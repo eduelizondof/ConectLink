@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { Star, Package } from 'lucide-vue-next';
 import { GlowingBorder } from '@/components/effects';
 import type { Product, ProfileSettings } from '@/types/profile';
@@ -21,6 +22,17 @@ const props = defineProps<{
 const emit = defineEmits<{
     click: [product: Product];
 }>();
+
+// Compute the image URL, handling both old format (relative path) and new format (full URL)
+const imageUrl = computed(() => {
+    if (!props.product.image) return null;
+    // If already a full URL or starts with /storage/, use as-is
+    if (props.product.image.startsWith('http') || props.product.image.startsWith('/storage/')) {
+        return props.product.image;
+    }
+    // Otherwise, prepend /storage/
+    return `/storage/${props.product.image}`;
+});
 
 function handleClick() {
     emit('click', props.product);
@@ -49,8 +61,8 @@ function handleClick() {
             <!-- Product Image -->
             <div class="aspect-square rounded-t-lg overflow-hidden bg-gray-100 relative">
                 <img
-                    v-if="product.image"
-                    :src="product.image"
+                    v-if="imageUrl"
+                    :src="imageUrl"
                     :alt="product.name"
                     class="w-full h-full object-cover"
                 />
