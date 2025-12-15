@@ -9,6 +9,7 @@ import {
     Wand2,
     Layers,
     RotateCcw,
+    Eye,
 } from 'lucide-vue-next';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -40,6 +41,7 @@ interface Profile {
 interface Organization {
     id: number;
     name: string;
+    slug: string;
     profiles: Profile[];
     [key: string]: any;
 }
@@ -56,6 +58,20 @@ const emit = defineEmits<{
 const selectedProfile = computed(() =>
     props.organization.profiles.find(p => p.id === props.selectedProfileId) || null
 );
+
+// Computed profile URL
+const profileUrl = computed(() => {
+    if (!selectedProfile.value) return null;
+    
+    let url = `/${props.organization.slug}`;
+    
+    // If not primary and has slug, append profile slug
+    if (!selectedProfile.value.is_primary && selectedProfile.value.slug) {
+        url += `/${selectedProfile.value.slug}`;
+    }
+    
+    return url;
+});
 
 // Refs for child components
 const backgroundRef = ref<InstanceType<typeof DesignBackgroundSection> | null>(null);
@@ -121,6 +137,15 @@ function resetToDefaults() {
                             {{ profile.name }} {{ profile.is_primary ? '(Principal)' : '' }}
                         </option>
                     </select>
+                    <a
+                        v-if="profileUrl"
+                        :href="profileUrl"
+                        target="_blank"
+                        class="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium hover:bg-muted"
+                    >
+                        <Eye class="h-4 w-4" />
+                        Ver Perfil
+                    </a>
                 </div>
                 <Button variant="outline" size="sm" @click="resetToDefaults" class="gap-1">
                     <RotateCcw class="h-4 w-4" />

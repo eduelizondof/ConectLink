@@ -188,7 +188,7 @@ watch(() => props.organization.profiles, (profiles) => {
                         class="flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium hover:bg-muted"
                     >
                         <Eye class="h-4 w-4" />
-                        Ver Perfil
+                        Ver Organización
                     </a>
                 </div>
             </div>

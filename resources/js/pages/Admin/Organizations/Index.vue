@@ -180,7 +180,7 @@ onMounted(() => {
                                 <DropdownMenuItem as-child>
                                     <a :href="`/${org.slug}`" target="_blank" class="flex items-center gap-2">
                                         <Eye class="h-4 w-4" />
-                                        Ver Perfil
+                                        Ver Organización
                                     </a>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
