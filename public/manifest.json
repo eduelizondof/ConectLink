@@ -1,27 +1,39 @@
 {
-    "name": "ConectLink - Tu tarjeta digital inteligente",
-    "short_name": "ConectLink",
-    "description": "La forma más fácil, moderna y profesional de compartir toda tu información, enlaces y catálogos desde un solo lugar. Potenciado por Conectiva ITS.",
+    "name": "Link - Tu tarjeta digital inteligente | CNVA",
+    "short_name": "Link",
+    "description": "La forma más fácil, moderna y profesional de compartir toda tu información, enlaces y catálogos desde un solo lugar. Por CNVA - Conectiva IT Solutions.",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#0a0a0f",
-    "theme_color": "#06b6d4",
+    "background_color": "#0f0f23",
+    "theme_color": "#6366f1",
     "orientation": "portrait-primary",
     "scope": "/",
     "lang": "es-MX",
     "categories": ["business", "productivity", "social"],
     "icons": [
         {
-            "src": "/apple-touch-icon.png",
+            "src": "/favicon/apple-touch-icon.png",
             "sizes": "180x180",
             "type": "image/png",
             "purpose": "any maskable"
         },
         {
-            "src": "/favicon.svg",
+            "src": "/favicon/favicon.svg",
             "sizes": "any",
             "type": "image/svg+xml",
             "purpose": "any"
+        },
+        {
+            "src": "/favicon/web-app-manifest-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/favicon/web-app-manifest-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
         }
     ],
     "screenshots": [
@@ -42,9 +54,9 @@
         {
             "name": "Mi Perfil",
             "short_name": "Perfil",
-            "description": "Accede a tu perfil de ConectLink",
+            "description": "Accede a tu perfil de Link",
             "url": "/dashboard",
-            "icons": [{ "src": "/apple-touch-icon.png", "sizes": "180x180" }]
+            "icons": [{ "src": "/favicon/apple-touch-icon.png", "sizes": "180x180" }]
         }
     ],
     "related_applications": [],

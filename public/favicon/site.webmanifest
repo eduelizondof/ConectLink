@@ -1,0 +1,27 @@
+{
+  "name": "Link - Tu tarjeta digital inteligente | CNVA",
+  "short_name": "Link",
+  "description": "La forma más fácil, moderna y profesional de compartir toda tu información, enlaces y catálogos desde un solo lugar. Por CNVA - Conectiva IT Solutions.",
+  "start_url": "/",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/favicon/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "theme_color": "#6366f1",
+  "background_color": "#0f0f23",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "lang": "es-MX",
+  "dir": "ltr"
+}

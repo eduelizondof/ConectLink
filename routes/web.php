@@ -11,6 +11,28 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
+// Sitemap for SEO
+Route::get('/sitemap.xml', function () {
+    $sitemap = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+    $sitemap .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+    
+    // Homepage
+    $sitemap .= '  <url>' . "\n";
+    $sitemap .= '    <loc>https://link.cnva.mx/</loc>' . "\n";
+    $sitemap .= '    <lastmod>' . date('Y-m-d') . '</lastmod>' . "\n";
+    $sitemap .= '    <changefreq>daily</changefreq>' . "\n";
+    $sitemap .= '    <priority>1.0</priority>' . "\n";
+    $sitemap .= '  </url>' . "\n";
+    
+    // TODO: Add dynamic profile pages here when needed
+    // You can query your database for public profiles and add them dynamically
+    
+    $sitemap .= '</urlset>';
+    
+    return response($sitemap, 200)
+        ->header('Content-Type', 'application/xml');
+})->name('sitemap');
+
 Route::get('dashboard', function () {
     return redirect()->route('admin.dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
