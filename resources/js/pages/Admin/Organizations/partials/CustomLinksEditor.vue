@@ -377,14 +377,24 @@ function moveLink(link: any, direction: 'up' | 'down') {
                     </div>
 
                     <div class="grid gap-4 sm:grid-cols-2">
-                        <ColorPicker
-                            v-model="form.button_color"
-                            label="Color del botón"
-                        />
-                        <ColorPicker
-                            v-model="form.text_color"
-                            label="Color del texto"
-                        />
+                        <div class="space-y-2">
+                            <ColorPicker
+                                v-model="form.button_color"
+                                label="Color del botón"
+                            />
+                            <p class="text-xs text-muted-foreground">
+                                Si no especificas un color, se usará el color de fondo de las tarjetas configurado en la pestaña "Estilos"
+                            </p>
+                        </div>
+                        <div class="space-y-2">
+                            <ColorPicker
+                                v-model="form.text_color"
+                                label="Color del texto"
+                            />
+                            <p class="text-xs text-muted-foreground">
+                                Si no especificas un color, se usará el color de texto configurado en la pestaña "Estilos"
+                            </p>
+                        </div>
                     </div>
 
                     <div class="flex justify-end gap-3 pt-2">
@@ -481,14 +491,24 @@ function moveLink(link: any, direction: 'up' | 'down') {
                     </div>
 
                     <div class="grid gap-4 sm:grid-cols-2">
-                        <ColorPicker
-                            v-model="form.button_color"
-                            label="Color del botón"
-                        />
-                        <ColorPicker
-                            v-model="form.text_color"
-                            label="Color del texto"
-                        />
+                        <div class="space-y-2">
+                            <ColorPicker
+                                v-model="form.button_color"
+                                label="Color del botón"
+                            />
+                            <p class="text-xs text-muted-foreground">
+                                Si no especificas un color, se usará el color de fondo de las tarjetas configurado en la pestaña "Estilos"
+                            </p>
+                        </div>
+                        <div class="space-y-2">
+                            <ColorPicker
+                                v-model="form.text_color"
+                                label="Color del texto"
+                            />
+                            <p class="text-xs text-muted-foreground">
+                                Si no especificas un color, se usará el color de texto configurado en la pestaña "Estilos"
+                            </p>
+                        </div>
                     </div>
 
                     <div class="flex justify-end gap-3 pt-2">
