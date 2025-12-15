@@ -1,4 +1,4 @@
-import { computed, type ComputedRef } from 'vue';
+import { computed, type ComputedRef, unref, type MaybeRefOrGetter } from 'vue';
 import type { ProfileSettings } from '@/types/profile';
 
 export function getDefaultSettings(): ProfileSettings {
@@ -46,8 +46,13 @@ export function getGradientDirection(direction: string): string {
     return map[direction] || '180deg';
 }
 
-export function useProfileSettings(profileSettings?: ProfileSettings) {
-    const settings = computed(() => profileSettings || getDefaultSettings());
+export function useProfileSettings(profileSettings?: MaybeRefOrGetter<ProfileSettings>) {
+    const settings = computed(() => {
+        const value = typeof profileSettings === 'function' 
+            ? profileSettings() 
+            : unref(profileSettings);
+        return value || getDefaultSettings();
+    });
 
     const backgroundStyle = computed(() => {
         const s = settings.value;
@@ -84,25 +89,75 @@ export function useProfileSettings(profileSettings?: ProfileSettings) {
         };
         classes.push(radiusMap[s.card_border_radius] || 'rounded-lg');
 
-        // Shadow
+        // Shadow - ajustar según estilo de tarjeta
         if (s.card_shadow) {
-            classes.push('shadow-lg');
+            if (s.card_style === 'glass') {
+                // Glass necesita sombra más pronunciada para destacar el efecto
+                classes.push('shadow-xl');
+            } else if (s.card_style === 'transparent') {
+                // Transparent necesita sombra más suave
+                classes.push('shadow-md');
+            } else {
+                // Solid usa sombra estándar
+                classes.push('shadow-lg');
+            }
         }
 
         return classes.join(' ');
     });
 
+    // Helper function to convert hex color to rgba
+    const hexToRgba = (hex: string, alpha: number): string => {
+        // Remove # if present
+        const cleanHex = hex.replace('#', '');
+        
+        // Check if it's a valid hex color (6 characters)
+        if (cleanHex.length === 6 && /^[0-9A-Fa-f]{6}$/.test(cleanHex)) {
+            const r = parseInt(cleanHex.substring(0, 2), 16);
+            const g = parseInt(cleanHex.substring(2, 4), 16);
+            const b = parseInt(cleanHex.substring(4, 6), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+        
+        // Fallback: if not a valid hex, try to use the color as-is with opacity
+        // This handles named colors like 'white', 'transparent', etc.
+        return hex;
+    };
+
     const cardStyle = computed(() => {
         const s = settings.value;
-        const style: Record<string, string> = {
-            backgroundColor: s.card_background_color,
-        };
+        const style: Record<string, string> = {};
+        const bgColor = s.card_background_color || '#ffffff';
 
-        if (s.card_style === 'glass') {
-            style.backdropFilter = 'blur(20px)';
-            style.WebkitBackdropFilter = 'blur(20px)';
+        // Aplicar estilos según el tipo de tarjeta
+        if (s.card_style === 'solid') {
+            // Estilo sólido: fondo completamente opaco
+            style.backgroundColor = bgColor;
+        } else if (s.card_style === 'transparent') {
+            // Estilo transparente: fondo con opacidad reducida
+            const rgbaColor = hexToRgba(bgColor, 0.3);
+            style.backgroundColor = rgbaColor;
+            // Borde sutil para definir la tarjeta
+            if (!s.card_border_color) {
+                const borderColor = hexToRgba(bgColor, 0.2);
+                style.border = `1px solid ${borderColor}`;
+            }
+        } else if (s.card_style === 'glass') {
+            // Estilo cristal: efecto glassmorphism
+            const rgbaColor = hexToRgba(bgColor, 0.15);
+            style.backgroundColor = rgbaColor;
+            style.backdropFilter = 'blur(20px) saturate(180%)';
+            style.WebkitBackdropFilter = 'blur(20px) saturate(180%)';
+            // Borde sutil para el efecto glass
+            if (!s.card_border_color) {
+                style.border = `1px solid rgba(255, 255, 255, 0.2)`;
+            }
+        } else {
+            // Fallback a sólido
+            style.backgroundColor = bgColor;
         }
 
+        // Aplicar color de borde personalizado si existe (sobrescribe el borde por defecto)
         if (s.card_border_color) {
             style.border = `1px solid ${s.card_border_color}`;
         }

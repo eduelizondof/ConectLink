@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { Download, Eye } from 'lucide-vue-next';
 import type { Profile, Organization, ProfileSettings, Product, Category, ProductSection } from '@/types/profile';
-import { getDefaultSettings, getGradientDirection } from '@/composables/useProfileSettings';
+import { getDefaultSettings, useProfileSettings } from '@/composables/useProfileSettings';
 import { useProfileHelpers } from '@/composables/useProfileHelpers';
 import ProfileHeader from '@/components/profile/ProfileHeader.vue';
 import SocialLinks from '@/components/profile/SocialLinks.vue';
@@ -76,6 +76,12 @@ const normalizedSettings = computed<ProfileSettings>(() => {
         card_style: profileSettings.card_style || defaults.card_style,
         card_background_color: profileSettings.card_background_color || defaults.card_background_color,
         card_border_radius: profileSettings.card_border_radius || defaults.card_border_radius,
+        card_shadow: profileSettings.card_shadow ?? defaults.card_shadow,
+        card_border_color: profileSettings.card_border_color || defaults.card_border_color,
+        card_glow_enabled: profileSettings.card_glow_enabled ?? defaults.card_glow_enabled,
+        card_glow_color: profileSettings.card_glow_color || defaults.card_glow_color,
+        card_glow_color_secondary: profileSettings.card_glow_color_secondary || defaults.card_glow_color_secondary,
+        card_glow_variant: profileSettings.card_glow_variant || defaults.card_glow_variant,
         photo_style: profileSettings.photo_style || defaults.photo_style,
         photo_size: profileSettings.photo_size || 'md', // Smaller for preview
         social_style: profileSettings.social_style || defaults.social_style,
@@ -85,25 +91,8 @@ const normalizedSettings = computed<ProfileSettings>(() => {
     };
 });
 
-// Create reactive backgroundStyle that watches normalizedSettings - same logic as ProfilePage
-const backgroundStyle = computed(() => {
-    const s = normalizedSettings.value;
-    if (s.background_type === 'gradient' && s.background_gradient_start && s.background_gradient_end) {
-        return {
-            background: `linear-gradient(${getGradientDirection(s.background_gradient_direction)}, ${s.background_gradient_start}, ${s.background_gradient_end})`,
-        };
-    } else if (s.background_type === 'image' && s.background_image) {
-        return {
-            backgroundImage: `url(${s.background_image})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-        };
-    } else if (s.background_type === 'animated' && s.background_animated_media) {
-        // For animated backgrounds, return empty style as we'll use a video/img element
-        return {};
-    }
-    return { backgroundColor: s.background_color };
-});
+// Use the same composable as ProfilePage for consistency - now accepts computed
+const { backgroundStyle } = useProfileSettings(normalizedSettings);
 
 // Normalize profile data to match ProfilePage format
 const normalizedProfile = computed<Profile>(() => {
