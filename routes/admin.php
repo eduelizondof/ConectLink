@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\PlansController;
 use App\Http\Controllers\Admin\ProductCategoryController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\ProfileDesignController;
 use App\Http\Controllers\Admin\QrBusinessCardController;
 use App\Http\Controllers\Admin\SocialLinkController;
 use App\Http\Controllers\Admin\VcardController;
@@ -43,8 +44,17 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     // Profiles (within organization)
     Route::post('/organizations/{organization}/profiles', [ProfileController::class, 'store'])->name('profiles.store');
     Route::match(['put', 'post'], '/profiles/{profile}', [ProfileController::class, 'update'])->name('profiles.update');
-    Route::put('/profiles/{profile}/settings', [ProfileController::class, 'updateSettings'])->name('profiles.settings');
     Route::delete('/profiles/{profile}', [ProfileController::class, 'destroy'])->name('profiles.destroy');
+
+    // Profile Design Settings (segmented endpoints)
+    Route::prefix('profiles/{profile}/design')->name('profiles.design.')->group(function () {
+        Route::put('/background', [ProfileDesignController::class, 'updateBackground'])->name('background');
+        Route::put('/colors', [ProfileDesignController::class, 'updateColors'])->name('colors');
+        Route::put('/cards', [ProfileDesignController::class, 'updateCards'])->name('cards');
+        Route::put('/animations', [ProfileDesignController::class, 'updateAnimations'])->name('animations');
+        Route::put('/effects', [ProfileDesignController::class, 'updateEffects'])->name('effects');
+        Route::put('/layout', [ProfileDesignController::class, 'updateLayout'])->name('layout');
+    });
 
     // Social Links
     Route::post('/profiles/{profile}/social-links', [SocialLinkController::class, 'store'])->name('social-links.store');
