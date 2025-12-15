@@ -2,7 +2,7 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { useSwal } from '@/composables/useSwal';
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import {
     Building2,
     User,
@@ -29,6 +29,7 @@ import {
     TabsList,
     TabsTrigger,
 } from '@/components/ui/tabs';
+import { Spinner } from '@/components/ui/spinner';
 import ProfilePreview from './partials/ProfilePreview.vue';
 import ProfileEditor from './partials/ProfileEditor.vue';
 import DesignEditor from './partials/DesignEditor.vue';
@@ -71,6 +72,7 @@ const swal = useSwal();
 
 // Active tab
 const activeTab = ref('general');
+const isLoadingTab = ref(false);
 
 // Selected profile for editing
 const selectedProfileId = ref<number | null>(
@@ -145,6 +147,17 @@ watch(() => props.organization.profiles, (profiles) => {
         selectedProfileId.value = profiles.find(p => p.is_primary)?.id || profiles[0].id;
     }
 });
+
+// Watch for tab changes to show loading indicator
+watch(activeTab, async () => {
+    isLoadingTab.value = true;
+    // Wait for the next tick to ensure DOM updates
+    await nextTick();
+    // Small delay to show loading indicator and allow content to render
+    setTimeout(() => {
+        isLoadingTab.value = false;
+    }, 150);
+});
 </script>
 
 <template>
@@ -155,7 +168,7 @@ watch(() => props.organization.profiles, (profiles) => {
         { title: 'Organizaciones', href: '/admin/organizations' },
         { title: organization.name, href: `/admin/organizations/${organization.id}/edit` },
     ]">
-        <div class="flex-1 p-4 md:p-6">
+        <div class="flex-1 p-4 md:p-6 min-h-0">
             <!-- Header -->
             <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div class="flex items-center gap-4">
@@ -194,7 +207,13 @@ watch(() => props.organization.profiles, (profiles) => {
             </div>
 
             <!-- Main Content with Tabs -->
-            <Tabs v-model="activeTab" class="space-y-6">
+            <Tabs v-model="activeTab" class="relative space-y-6">
+                <div v-if="isLoadingTab" class="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg">
+                    <div class="flex flex-col items-center gap-2">
+                        <Spinner class="h-6 w-6" />
+                        <span class="text-sm text-muted-foreground">Cargando...</span>
+                    </div>
+                </div>
                 <TabsList class="w-full justify-start overflow-x-auto">
                     <TabsTrigger value="general" class="gap-2">
                         <Settings class="h-4 w-4" />
@@ -424,7 +443,12 @@ watch(() => props.organization.profiles, (profiles) => {
                             <ProfilePreview
                                 v-if="selectedProfile"
                                 :profile="selectedProfile"
-                                :organization="organization"
+                                :organization="{
+                                    ...organization,
+                                    products: organization.products || [],
+                                    productCategories: organization.productCategories || [],
+                                    productSections: organization.productSections || [],
+                                }"
                             />
                         </div>
                     </div>
@@ -468,7 +492,12 @@ watch(() => props.organization.profiles, (profiles) => {
                             <ProfilePreview
                                 v-if="selectedProfile"
                                 :profile="selectedProfile"
-                                :organization="organization"
+                                :organization="{
+                                    ...organization,
+                                    products: organization.products || [],
+                                    productCategories: organization.productCategories || [],
+                                    productSections: organization.productSections || [],
+                                }"
                             />
                         </div>
                     </div>

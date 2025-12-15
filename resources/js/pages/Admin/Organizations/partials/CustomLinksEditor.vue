@@ -51,11 +51,16 @@ const form = useForm({
     text_color: null as string | null,
 });
 
-const canAddMore = computed(() => (props.profile.custom_links?.length || 0) < props.maxLinks);
+const canAddMore = computed(() => {
+    const links = props.profile.custom_links || (props.profile as any).customLinks || [];
+    return (links.length || 0) < props.maxLinks;
+});
 
 const sortedLinks = computed(() => {
-    if (!props.profile.custom_links) return [];
-    return [...props.profile.custom_links].sort((a: any, b: any) => {
+    // Try both snake_case and camelCase to handle Laravel serialization
+    const links = props.profile.custom_links || (props.profile as any).customLinks || [];
+    if (!links || !Array.isArray(links)) return [];
+    return [...links].sort((a: any, b: any) => {
         return (a.sort_order || 0) - (b.sort_order || 0);
     });
 });
@@ -160,7 +165,8 @@ async function deleteLink(link: any) {
 
 function moveLink(link: any, direction: 'up' | 'down') {
     // Sort links by sort_order to ensure correct order
-    const links = [...(props.profile.custom_links || [])].sort((a: any, b: any) => {
+    const profileLinks = props.profile.custom_links || (props.profile as any).customLinks || [];
+    const links = [...profileLinks].sort((a: any, b: any) => {
         return (a.sort_order || 0) - (b.sort_order || 0);
     });
     
@@ -202,7 +208,7 @@ function moveLink(link: any, direction: 'up' | 'down') {
             <div>
                 <h3 class="font-semibold">Tarjetas Personalizadas</h3>
                 <p class="text-sm text-muted-foreground">
-                    {{ profile.custom_links?.length || 0 }}/{{ maxLinks }} tarjetas
+                    {{ (profile.custom_links || (profile as any).customLinks || []).length }}/{{ maxLinks }} tarjetas
                 </p>
             </div>
             <Button

@@ -93,6 +93,7 @@ class OrganizationController extends Controller
     {
         $this->authorize('update', $organization);
 
+        // Load all relationships - don't use refresh() as it resets loaded relations
         $organization->load([
             'profiles' => function ($query) {
                 $query->with(['settings', 'socialLinks', 'customLinks', 'floatingAlerts', 'vcardSettings', 'qrSettings'])
@@ -110,9 +111,6 @@ class OrganizationController extends Controller
             'products.category',
             'products.sections',
         ]);
-
-        // Refresh the organization to ensure relationships are loaded
-        $organization->refresh();
 
         $limits = $request->user()->getLimits();
 
